@@ -140,6 +140,30 @@ type MainWindowViewModel
             else
                 setStatus (String.concat "\n" (List.rev errors))
 
+    let uninstallSelected () =
+        let selected = selectedAppRows ()
+
+        if selected.IsEmpty then
+            setStatus "Nothing is selected."
+        else
+            let mutable errors = []
+
+            for row in selected do
+                match BrewClient.uninstall brew row.App with
+                | Ok() -> ()
+                | Error msg -> errors <- msg :: errors
+
+            refreshAppDetect ()
+
+            if errors.IsEmpty then
+                setStatus (sprintf "Uninstalled %d app(s)." selected.Length)
+            else
+                setStatus (String.concat "\n" (List.rev errors))
+
+    let refreshInstalled () =
+        refreshAppDetect ()
+        setStatus "Refreshed installed apps."
+
     let selectIds (ids: string list) =
         let wanted = Set.ofList ids
 
@@ -216,6 +240,8 @@ type MainWindowViewModel
     let applyCommand = RelayCommand(fun _ -> applySelected ())
     let undoCommand = RelayCommand(fun _ -> undoSelected ())
     let installCommand = RelayCommand(fun _ -> installSelected ())
+    let uninstallCommand = RelayCommand(fun _ -> uninstallSelected ())
+    let refreshInstalledCommand = RelayCommand(fun _ -> refreshInstalled ())
     let selectStandardCommand = RelayCommand(fun _ -> selectPreset "Standard")
     let selectMinimalCommand = RelayCommand(fun _ -> selectPreset "Minimal")
     let brewUpdateCommand = RelayCommand(fun _ -> runMaintenance BrewUpdate)
@@ -320,6 +346,10 @@ type MainWindowViewModel
 
     member _.InstallSelected() = installSelected ()
 
+    member _.UninstallSelected() = uninstallSelected ()
+
+    member _.RefreshInstalled() = refreshInstalled ()
+
     member _.RunBrewUpdate() = runMaintenance BrewUpdate
 
     member _.RunBrewCleanup() = runMaintenance BrewCleanup
@@ -341,6 +371,10 @@ type MainWindowViewModel
     member _.UndoCommand = undoCommand
 
     member _.InstallCommand = installCommand
+
+    member _.UninstallCommand = uninstallCommand
+
+    member _.RefreshInstalledCommand = refreshInstalledCommand
 
     member _.SelectStandardCommand = selectStandardCommand
 
