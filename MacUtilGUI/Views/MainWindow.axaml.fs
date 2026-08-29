@@ -28,7 +28,7 @@ type MainWindow() as this =
             else
                 WindowState.FullScreen
 
-    member private this.TitleBar_PointerPressed(_: obj, e: PointerPressedEventArgs) = this.BeginMoveDrag(e)
+    member private this.TitleBar_PointerPressed(_: obj, _: PointerPressedEventArgs) = this.BeginMoveDrag(e)
 
     member private this.JsonFileType() =
         let jsonType = FilePickerFileType("JSON")
