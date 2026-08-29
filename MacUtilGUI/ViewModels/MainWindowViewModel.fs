@@ -34,6 +34,8 @@ type MainWindowViewModel
     let mutable searchText: string = ""
     let safeTweaks = ObservableCollection<TweakRowViewModel>()
     let cautionTweaks = ObservableCollection<TweakRowViewModel>()
+    let safeTweakGroups = ObservableCollection<TweakGroupViewModel>()
+    let cautionTweakGroups = ObservableCollection<TweakGroupViewModel>()
     let allApps = ResizeArray<AppRowViewModel>()
     let apps = ObservableCollection<AppRowViewModel>()
     let appGroups = ObservableCollection<AppGroupViewModel>()
@@ -232,6 +234,12 @@ type MainWindowViewModel
         | "Privacy" -> 4
         | _ -> 5
 
+    let fillTweakGroups (source: TweakRowViewModel seq) (target: ObservableCollection<TweakGroupViewModel>) =
+        source
+        |> Seq.groupBy (fun (row: TweakRowViewModel) -> row.Category)
+        |> Seq.sortBy (fun (category, _) -> categoryRank category, category)
+        |> Seq.iter (fun (category, rows) -> target.Add(TweakGroupViewModel(category, rows)))
+
     do
         catalog.Tweaks
         |> Map.toSeq
@@ -243,6 +251,9 @@ type MainWindowViewModel
             match tweak.Risk with
             | Risk.Safe -> safeTweaks.Add(row)
             | Risk.Caution -> cautionTweaks.Add(row))
+
+        fillTweakGroups safeTweaks safeTweakGroups
+        fillTweakGroups cautionTweaks cautionTweakGroups
 
         catalog.Apps
         |> Map.toSeq
@@ -276,6 +287,10 @@ type MainWindowViewModel
     member _.SafeTweaks = safeTweaks
 
     member _.CautionTweaks = cautionTweaks
+
+    member _.SafeTweakGroups = safeTweakGroups
+
+    member _.CautionTweakGroups = cautionTweakGroups
 
     member _.Apps = apps
 
