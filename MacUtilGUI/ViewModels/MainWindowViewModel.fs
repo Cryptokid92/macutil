@@ -4,8 +4,6 @@ open System
 open System.IO
 open System.Collections.ObjectModel
 open System.Windows.Input
-open System.Threading.Tasks
-open Avalonia.Threading
 open MacUtilGUI.Models
 open MacUtilGUI.Services
 
@@ -21,16 +19,15 @@ type RelayCommand(canExecute: obj -> bool, execute: obj -> unit) =
 
     new(execute: obj -> unit) = RelayCommand((fun _ -> true), execute)
 
-type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IProcessKiller) as this =
+type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IProcessKiller, brew: BrewExec) as this =
     inherit ViewModelBase()
 
-    let mutable selectedScript: ScriptInfo option = None
-    let mutable scriptOutput: string = ""
-    let mutable isScriptRunning: bool = false
     let mutable statusText: string = ""
-    let categories = ObservableCollection<ScriptCategory>()
+    let mutable searchText: string = ""
     let safeTweaks = ObservableCollection<TweakRowViewModel>()
     let cautionTweaks = ObservableCollection<TweakRowViewModel>()
+    let allApps = ResizeArray<AppRowViewModel>()
+    let apps = ObservableCollection<AppRowViewModel>()
 
     let allRows () = Seq.append safeTweaks cautionTweaks
 
@@ -41,90 +38,80 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
     let selectedRows () =
         allRows () |> Seq.filter (fun row -> row.IsChecked) |> Seq.toList
 
+    let selectedAppRows () =
+        allApps |> Seq.filter (fun row -> row.IsChecked) |> Seq.toList
+
+    let setStatus text =
+        statusText <- text
+        this.OnPropertyChanged("StatusText")
+
     let applySelected () =
         let selected = selectedRows ()
 
         if selected.IsEmpty then
-            statusText <- "Nothing is selected."
-            this.OnPropertyChanged("StatusText")
+            setStatus "Nothing is selected."
         else
             for row in selected do
                 ActionEngine.apply client killer row.Tweak
 
             refreshDetect ()
-            statusText <- sprintf "Applied %d tweak(s)." selected.Length
-            this.OnPropertyChanged("StatusText")
+            setStatus (sprintf "Applied %d tweak(s)." selected.Length)
 
     let undoSelected () =
         let selected = selectedRows ()
 
         if selected.IsEmpty then
-            statusText <- "Nothing is selected."
-            this.OnPropertyChanged("StatusText")
+            setStatus "Nothing is selected."
         else
             for row in selected do
                 ActionEngine.undo client killer row.Tweak
 
             refreshDetect ()
-            statusText <- sprintf "Undid %d tweak(s)." selected.Length
-            this.OnPropertyChanged("StatusText")
+            setStatus (sprintf "Undid %d tweak(s)." selected.Length)
+
+    let refreshAppDetect () =
+        for row in allApps do
+            row.IsChecked <- BrewClient.installed brew row.App
+
+    let matches (row: AppRowViewModel) (query: string) =
+        if String.IsNullOrWhiteSpace query then
+            true
+        else
+            let hit (value: string) =
+                value.IndexOf(query.Trim(), StringComparison.OrdinalIgnoreCase) >= 0
+
+            hit row.Content || hit row.Id || hit row.Category || hit row.Description
+
+    let applyFilter () =
+        apps.Clear()
+
+        for row in allApps do
+            if matches row searchText then
+                apps.Add(row)
+
+    let installSelected () =
+        let selected = selectedAppRows ()
+
+        if selected.IsEmpty then
+            setStatus "Nothing is selected."
+        else
+            let mutable errors = []
+
+            for row in selected do
+                match BrewClient.install brew row.App with
+                | Ok() -> ()
+                | Error msg -> errors <- msg :: errors
+
+            refreshAppDetect ()
+
+            if errors.IsEmpty then
+                setStatus (sprintf "Installed %d app(s)." selected.Length)
+            else
+                setStatus (String.concat "\n" (List.rev errors))
 
     let applyCommand = RelayCommand(fun _ -> applySelected ())
     let undoCommand = RelayCommand(fun _ -> undoSelected ())
-
-    let selectScriptCommand =
-        RelayCommand(fun parameter ->
-            match parameter with
-            | :? ScriptInfo as script ->
-                selectedScript <- Some script
-                scriptOutput <- ""
-                this.OnPropertyChanged("SelectedScript")
-                this.OnPropertyChanged("ScriptOutput")
-                this.OnPropertyChanged("CanRunScript")
-                this.OnPropertyChanged("SelectedScriptName")
-                this.OnPropertyChanged("SelectedScriptDescription")
-                this.OnPropertyChanged("SelectedScriptCategory")
-                this.OnPropertyChanged("SelectedScriptFile")
-            | _ -> ())
-
-    let runScriptCommand =
-        RelayCommand(fun _ ->
-            match selectedScript with
-            | Some script when not isScriptRunning ->
-                isScriptRunning <- true
-                scriptOutput <- "Starting script...\n"
-                this.OnPropertyChanged("ScriptOutput")
-                this.OnPropertyChanged("CanRunScript")
-                this.OnPropertyChanged("IsScriptRunning")
-
-                let onOutput (line: string) =
-                    Dispatcher.UIThread.InvokeAsync(fun () ->
-                        scriptOutput <- scriptOutput + line + "\n"
-                        this.OnPropertyChanged("ScriptOutput"))
-                    |> ignore
-
-                let onError (line: string) =
-                    Dispatcher.UIThread.InvokeAsync(fun () ->
-                        scriptOutput <- scriptOutput + "[ERROR] " + line + "\n"
-                        this.OnPropertyChanged("ScriptOutput"))
-                    |> ignore
-
-                let scriptTask = ScriptService.runScript script onOutput onError
-
-                scriptTask.ContinueWith(fun (task: Task<int>) ->
-                    Dispatcher.UIThread.InvokeAsync(fun () ->
-                        isScriptRunning <- false
-
-                        scriptOutput <-
-                            scriptOutput
-                            + sprintf "\n=== Script completed with exit code: %d ===" task.Result
-
-                        this.OnPropertyChanged("ScriptOutput")
-                        this.OnPropertyChanged("CanRunScript")
-                        this.OnPropertyChanged("IsScriptRunning"))
-                    |> ignore)
-                |> ignore
-            | _ -> ())
+    let installCommand = RelayCommand(fun _ -> installSelected ())
 
     let categoryRank category =
         match category with
@@ -134,6 +121,16 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
         | "Screenshots" -> 3
         | "Privacy" -> 4
         | _ -> 5
+
+    let appCategoryRank category =
+        match category with
+        | "Communication Apps" -> 0
+        | "Developer Tools" -> 1
+        | "Web Browsers" -> 2
+        | "Terminal" -> 3
+        | "Shell" -> 4
+        | "Utilities" -> 5
+        | _ -> 6
 
     do
         catalog.Tweaks
@@ -147,13 +144,17 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
             | Risk.Safe -> safeTweaks.Add(row)
             | Risk.Caution -> cautionTweaks.Add(row))
 
-        for category in ScriptService.loadAllScripts () do
-            let fromSystemSetup =
-                category.Scripts
-                |> List.exists (fun script -> script.FullPath.StartsWith("system-setup"))
+        catalog.Apps
+        |> Map.toSeq
+        |> Seq.map snd
+        |> Seq.sortBy (fun app -> appCategoryRank app.Category, app.Content)
+        |> Seq.iter (fun app ->
+            allApps.Add(AppRowViewModel(app, BrewClient.installed brew app)))
 
-            if not fromSystemSetup then
-                categories.Add(category)
+        applyFilter ()
+
+    new(catalog, client, killer) =
+        MainWindowViewModel(catalog, client, killer, fun _ -> 0, "", "")
 
     new() =
         let dir = Path.Combine(AppContext.BaseDirectory, "config")
@@ -161,57 +162,42 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
         MainWindowViewModel(
             ConfigLoader.load dir,
             UnixDefaultsClient() :> IDefaultsClient,
-            UnixProcessKiller() :> IProcessKiller
+            UnixProcessKiller() :> IProcessKiller,
+            BrewClient.unixExec
         )
 
     member _.SafeTweaks = safeTweaks
 
     member _.CautionTweaks = cautionTweaks
 
+    member _.Apps = apps
+
+    member _.AllApps = allApps :> seq<AppRowViewModel>
+
     member _.StatusText = statusText
 
+    member this.SearchText
+        with get () = searchText
+        and set v =
+            if searchText <> v then
+                searchText <- if isNull v then "" else v
+                applyFilter ()
+                this.OnPropertyChanged("SearchText")
+
     member _.SelectedIds = selectedRows () |> List.map (fun row -> row.Id)
+
+    member _.SelectedAppIds = selectedAppRows () |> List.map (fun row -> row.Id)
 
     member _.ApplySelected() = applySelected ()
 
     member _.UndoSelected() = undoSelected ()
 
+    member _.InstallSelected() = installSelected ()
+
     member _.ApplyCommand = applyCommand
 
     member _.UndoCommand = undoCommand
 
-    member _.Categories = categories
-
-    member _.SelectedScript = selectedScript
-
-    member _.ScriptOutput = scriptOutput
-
-    member _.SelectedScriptName =
-        match selectedScript with
-        | Some script -> script.Name
-        | None -> ""
-
-    member _.SelectedScriptDescription =
-        match selectedScript with
-        | Some script -> script.Description
-        | None -> ""
-
-    member _.SelectedScriptCategory =
-        match selectedScript with
-        | Some script -> script.Category
-        | None -> ""
-
-    member _.SelectedScriptFile =
-        match selectedScript with
-        | Some script -> script.Script
-        | None -> ""
-
-    member _.CanRunScript = selectedScript.IsSome && not isScriptRunning
-
-    member _.IsScriptRunning = isScriptRunning
-
-    member _.SelectScriptCommand = selectScriptCommand
-
-    member _.RunScriptCommand = runScriptCommand
+    member _.InstallCommand = installCommand
 
     member _.Title = "MacUtil"

@@ -14,7 +14,7 @@ cd macutil
 dotnet run --project MacUtilGUI/MacUtilGUI.fsproj
 ```
 
-The window is opaque `#1C1C1E`. The menu bar says MacUtil. The list you see is still the old script runner. The JSON catalog and the detect, apply, undo engine are in the tree. The Tweaks tab that binds checkboxes to live defaults is not on `main` yet.
+The window is opaque `#1C1C1E`. The menu bar says MacUtil. Tweaks binds checkboxes to live defaults. Install lists Homebrew apps from `config/applications.json` and detects them with `BrewClient`.
 
 ## What changed from the CTT tree
 
@@ -25,7 +25,7 @@ The window is opaque `#1C1C1E`. The menu bar says MacUtil. The list you see is s
 - 34 first-wave tweaks. Finder, Dock, keyboard, screenshots, and privacy-adjacent user defaults. Four of them are Caution. The rest are Safe.
 - 26 Homebrew apps, including Alacritty, Fastfetch, Kitty, and ZSH, which the old TOML hid because they had no entries. Android Debloater is not in the catalog.
 - `BrewClient` lists and installs casks and formulas. Already installed is success.
-- Leftover `scripts/system-setup` files no longer prefix `$ESCALATION_TOOL` on `defaults write`. `system-cleanup.sh` no longer deletes `/var/log`.
+- Install tab. Checkboxes from `config/applications.json`. Detect and install go through `BrewClient` with no sudo. Search filters the list. An empty Install writes nothing.
 
 Counts at this commit, regenerate with:
 
@@ -33,20 +33,10 @@ Counts at this commit, regenerate with:
 python3 -c 'import json; print(len(json.load(open("config/tweaks.json"))), len(json.load(open("config/applications.json"))))'
 ```
 
-## What you cannot click yet
-
-The GUI still calls `ScriptService.runScript`. Presets, checkbox detect, JSON Homebrew install, and a CLI are next. Until those land, the catalogs and engine are for tests and for the tabs that follow.
-
 ## What is coming
 
-In flight on this fork:
+Queued after this:
 
-- Tweaks tab. Checkboxes from `config/tweaks.json`. Apply and Undo call `ActionEngine`. Caution rows stay out of Standard.
-- Universal CI. `osx-x64` on macos-13 and `osx-arm64` on macos-14, one version string.
-
-Queued after those:
-
-- Install tab from `config/applications.json`. Delete `ScriptService.fs` once callers move.
 - CLI. `macutil detect`, `apply`, and `undo`.
 - Maintenance tab for user-level cleanup. Still no `/var/log`.
 - Updates tab. Lists `softwareupdate --list` and `brew outdated`. Does not run `softwareupdate --install`.

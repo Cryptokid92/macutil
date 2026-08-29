@@ -14,6 +14,7 @@
     <Compile Include="BrewClientTests.fs" />
     <Compile Include="FirstWaveTweaksTests.fs" />
     <Compile Include="TweakTabTests.fs" />
+    <Compile Include="InstallTabTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
