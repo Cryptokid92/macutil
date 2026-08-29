@@ -10,15 +10,15 @@ script = "dev-setup.sh"
 
 [[data.entries]]
 name = "Full System Cleanup"
-description = "This script is designed to remove unnecessary packages, clean old cache files, remove temporary files, and to empty the trash."
+description = "Keep Spaces in a fixed order and empty the user Trash."
 script = "system-cleanup.sh"
 
 [[data.entries]]
 name = "Fix Finder"
-description = "Finder optimizations for people without a mental disorder."
+description = "Finder list view, path bar, extensions, and related user defaults."
 script = "fix-finder.sh"
 
 [[data.entries]]
 name = "Remove Animations"
-description = "This script is designed to remove snap packages and the snapd service from your system"
+description = "Reduce window and Dock animation durations via user defaults."
 script = "remove-animations.sh"
