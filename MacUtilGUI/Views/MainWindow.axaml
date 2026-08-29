@@ -223,6 +223,14 @@
                                     Command="{Binding InstallCommand}"
                                     Classes="macos-accent"
                                     Padding="20,10"/>
+                            <Button Content="Uninstall"
+                                    Command="{Binding UninstallCommand}"
+                                    Classes="macos-quiet"
+                                    Padding="20,10"/>
+                            <Button Content="Refresh"
+                                    Command="{Binding RefreshInstalledCommand}"
+                                    Classes="macos-quiet"
+                                    Padding="20,10"/>
                             <TextBlock Text="{Binding StatusText}"
                                        Classes="macos-secondary"
                                        VerticalAlignment="Center"/>
