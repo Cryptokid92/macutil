@@ -10,6 +10,7 @@ type TweakRowViewModel(tweak: Tweak, isChecked: bool) =
     member _.Id = tweak.Id
     member _.Content = tweak.Content
     member _.Description = tweak.Description
+    member _.Category = tweak.Category
     member _.Tweak = tweak
 
     member this.IsChecked
