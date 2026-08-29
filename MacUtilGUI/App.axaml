@@ -176,5 +176,11 @@
             <Setter Property="CaretBrush" Value="#FFFFFF"/>
             <Setter Property="Padding" Value="10,8"/>
         </Style>
+
+        <Style Selector="Expander">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
     </Application.Styles>
 </Application>
