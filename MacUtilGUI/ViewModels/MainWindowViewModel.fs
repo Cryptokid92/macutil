@@ -1,5 +1,7 @@
 namespace MacUtilGUI.ViewModels
 
+open System
+open System.IO
 open System.Collections.ObjectModel
 open System.Windows.Input
 open System.Threading.Tasks
@@ -19,20 +21,63 @@ type RelayCommand(canExecute: obj -> bool, execute: obj -> unit) =
 
     new(execute: obj -> unit) = RelayCommand((fun _ -> true), execute)
 
-type MainWindowViewModel() as this =
+type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IProcessKiller) as this =
     inherit ViewModelBase()
 
     let mutable selectedScript: ScriptInfo option = None
     let mutable scriptOutput: string = ""
     let mutable isScriptRunning: bool = false
+    let mutable statusText: string = ""
     let categories = ObservableCollection<ScriptCategory>()
+    let safeTweaks = ObservableCollection<TweakRowViewModel>()
+    let cautionTweaks = ObservableCollection<TweakRowViewModel>()
+
+    let allRows () = Seq.append safeTweaks cautionTweaks
+
+    let refreshDetect () =
+        for row in allRows () do
+            row.IsChecked <- ActionEngine.detect client row.Tweak
+
+    let selectedRows () =
+        allRows () |> Seq.filter (fun row -> row.IsChecked) |> Seq.toList
+
+    let applySelected () =
+        let selected = selectedRows ()
+
+        if selected.IsEmpty then
+            statusText <- "Nothing is selected."
+            this.OnPropertyChanged("StatusText")
+        else
+            for row in selected do
+                ActionEngine.apply client killer row.Tweak
+
+            refreshDetect ()
+            statusText <- sprintf "Applied %d tweak(s)." selected.Length
+            this.OnPropertyChanged("StatusText")
+
+    let undoSelected () =
+        let selected = selectedRows ()
+
+        if selected.IsEmpty then
+            statusText <- "Nothing is selected."
+            this.OnPropertyChanged("StatusText")
+        else
+            for row in selected do
+                ActionEngine.undo client killer row.Tweak
+
+            refreshDetect ()
+            statusText <- sprintf "Undid %d tweak(s)." selected.Length
+            this.OnPropertyChanged("StatusText")
+
+    let applyCommand = RelayCommand(fun _ -> applySelected ())
+    let undoCommand = RelayCommand(fun _ -> undoSelected ())
 
     let selectScriptCommand =
         RelayCommand(fun parameter ->
             match parameter with
             | :? ScriptInfo as script ->
                 selectedScript <- Some script
-                scriptOutput <- "" // Clear previous output
+                scriptOutput <- ""
                 this.OnPropertyChanged("SelectedScript")
                 this.OnPropertyChanged("ScriptOutput")
                 this.OnPropertyChanged("CanRunScript")
@@ -52,7 +97,6 @@ type MainWindowViewModel() as this =
                 this.OnPropertyChanged("CanRunScript")
                 this.OnPropertyChanged("IsScriptRunning")
 
-                // Define output and error handlers
                 let onOutput (line: string) =
                     Dispatcher.UIThread.InvokeAsync(fun () ->
                         scriptOutput <- scriptOutput + line + "\n"
@@ -65,7 +109,6 @@ type MainWindowViewModel() as this =
                         this.OnPropertyChanged("ScriptOutput"))
                     |> ignore
 
-                // Run script asynchronously with real-time output
                 let scriptTask = ScriptService.runScript script onOutput onError
 
                 scriptTask.ContinueWith(fun (task: Task<int>) ->
@@ -83,12 +126,59 @@ type MainWindowViewModel() as this =
                 |> ignore
             | _ -> ())
 
-    do
-        // Load scripts on initialization
-        let loadedCategories = ScriptService.loadAllScripts ()
+    let categoryRank category =
+        match category with
+        | "Finder" -> 0
+        | "Dock" -> 1
+        | "Keyboard" -> 2
+        | "Screenshots" -> 3
+        | "Privacy" -> 4
+        | _ -> 5
 
-        for category in loadedCategories do
-            categories.Add(category)
+    do
+        catalog.Tweaks
+        |> Map.toSeq
+        |> Seq.map snd
+        |> Seq.sortBy (fun tweak -> categoryRank tweak.Category, tweak.Content)
+        |> Seq.iter (fun tweak ->
+            let row = TweakRowViewModel(tweak, ActionEngine.detect client tweak)
+
+            match tweak.Risk with
+            | Risk.Safe -> safeTweaks.Add(row)
+            | Risk.Caution -> cautionTweaks.Add(row))
+
+        for category in ScriptService.loadAllScripts () do
+            let fromSystemSetup =
+                category.Scripts
+                |> List.exists (fun script -> script.FullPath.StartsWith("system-setup"))
+
+            if not fromSystemSetup then
+                categories.Add(category)
+
+    new() =
+        let dir = Path.Combine(AppContext.BaseDirectory, "config")
+
+        MainWindowViewModel(
+            ConfigLoader.load dir,
+            UnixDefaultsClient() :> IDefaultsClient,
+            UnixProcessKiller() :> IProcessKiller
+        )
+
+    member _.SafeTweaks = safeTweaks
+
+    member _.CautionTweaks = cautionTweaks
+
+    member _.StatusText = statusText
+
+    member _.SelectedIds = selectedRows () |> List.map (fun row -> row.Id)
+
+    member _.ApplySelected() = applySelected ()
+
+    member _.UndoSelected() = undoSelected ()
+
+    member _.ApplyCommand = applyCommand
+
+    member _.UndoCommand = undoCommand
 
     member _.Categories = categories
 
@@ -124,4 +214,4 @@ type MainWindowViewModel() as this =
 
     member _.RunScriptCommand = runScriptCommand
 
-    member _.Title = "MacUtil GUI - Script Runner"
+    member _.Title = "MacUtil"
