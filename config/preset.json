@@ -1,5 +1,27 @@
 {
   "Standard": [
-    "finder-show-extensions"
+    "finder-list-view",
+    "finder-search-current-folder",
+    "finder-empty-trash-30d",
+    "finder-show-extensions",
+    "finder-status-bar",
+    "finder-path-bar",
+    "finder-show-hidden",
+    "finder-folders-first",
+    "finder-no-ext-warning",
+    "finder-posix-title",
+    "dock-no-mru-spaces",
+    "dock-autohide",
+    "dock-autohide-delay-0",
+    "dock-autohide-time-0",
+    "dock-hide-recents",
+    "dock-no-launch-anim",
+    "dock-min-to-app"
+  ],
+  "Minimal": [
+    "finder-show-extensions",
+    "finder-status-bar",
+    "finder-path-bar",
+    "dock-autohide"
   ]
 }

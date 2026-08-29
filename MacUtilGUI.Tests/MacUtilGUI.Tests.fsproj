@@ -15,6 +15,7 @@
     <Compile Include="FirstWaveTweaksTests.fs" />
     <Compile Include="TweakTabTests.fs" />
     <Compile Include="InstallTabTests.fs" />
+    <Compile Include="PresetTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MacUtilGUI\MacUtilGUI.fsproj" />
+    <ProjectReference Include="..\MacUtilCLI\MacUtilCLI.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

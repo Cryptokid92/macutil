@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <AssemblyName>macutil</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MacUtilGUI\MacUtilGUI.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\config\*.json" CopyToOutputDirectory="PreserveNewest" Link="config\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

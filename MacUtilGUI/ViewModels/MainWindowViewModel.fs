@@ -109,9 +109,39 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
             else
                 setStatus (String.concat "\n" (List.rev errors))
 
+    let selectIds (ids: string list) =
+        let wanted = Set.ofList ids
+
+        for row in allRows () do
+            row.IsChecked <- wanted.Contains row.Id
+
+    let selectPreset name =
+        match PresetService.resolve catalog name with
+        | Error msg -> setStatus msg
+        | Ok ids ->
+            selectIds ids
+            setStatus (sprintf "Selected %s." name)
+
+    let exportSelected () =
+        let ids = selectedRows () |> List.map (fun row -> row.Id)
+        setStatus (sprintf "Exported %d id(s)." ids.Length)
+        PresetService.exportIds ids
+
+    let importJson json =
+        match PresetService.parseImport catalog json with
+        | Error msg ->
+            setStatus msg
+            false
+        | Ok ids ->
+            selectIds ids
+            setStatus (sprintf "Imported %d id(s)." ids.Length)
+            true
+
     let applyCommand = RelayCommand(fun _ -> applySelected ())
     let undoCommand = RelayCommand(fun _ -> undoSelected ())
     let installCommand = RelayCommand(fun _ -> installSelected ())
+    let selectStandardCommand = RelayCommand(fun _ -> selectPreset "Standard")
+    let selectMinimalCommand = RelayCommand(fun _ -> selectPreset "Minimal")
 
     let categoryRank category =
         match category with
@@ -192,10 +222,24 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
 
     member _.InstallSelected() = installSelected ()
 
+    member _.SelectStandard() = selectPreset "Standard"
+
+    member _.SelectMinimal() = selectPreset "Minimal"
+
+    member _.ExportSelected() = exportSelected ()
+
+    member _.ImportJson(json: string) = importJson json
+
+    member _.SetStatus(text: string) = setStatus text
+
     member _.ApplyCommand = applyCommand
 
     member _.UndoCommand = undoCommand
 
     member _.InstallCommand = installCommand
+
+    member _.SelectStandardCommand = selectStandardCommand
+
+    member _.SelectMinimalCommand = selectMinimalCommand
 
     member _.Title = "MacUtil"

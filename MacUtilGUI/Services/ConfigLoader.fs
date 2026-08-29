@@ -220,15 +220,25 @@ module ConfigLoader =
         |> Map.ofList
 
     let private validatePresets (tweaks: Map<string, Tweak>) (presets: Map<string, string list>) =
+        if not (Map.containsKey "Standard" presets) then
+            fail "preset.json must define Standard"
+
+        if not (Map.containsKey "Minimal" presets) then
+            fail "preset.json must define Minimal"
+
         for KeyValue(name, ids) in presets do
             for id in ids do
                 match Map.tryFind id tweaks with
                 | None -> fail $"Preset '{name}' references unknown tweak '{id}'"
-                | Some tweak when name = "Standard" ->
+                | Some tweak ->
                     match tweak.Risk with
+                    | Risk.Caution -> fail $"Preset '{name}' includes Caution tweak '{id}'"
+                    | Risk.Safe when name = "Standard" ->
+                        match tweak.Category with
+                        | "Finder"
+                        | "Dock" -> ()
+                        | cat -> fail $"Standard preset includes non Finder/Dock tweak '{id}' ({cat})"
                     | Risk.Safe -> ()
-                    | Risk.Caution -> fail $"Standard preset includes Caution tweak '{id}'"
-                | Some _ -> ()
 
     let load (configDir: string) =
         let read name =
