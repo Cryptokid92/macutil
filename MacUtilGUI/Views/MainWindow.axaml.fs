@@ -54,7 +54,7 @@ type MainWindow() as this =
                     if not (isNull file) then
                         File.WriteAllText(file.Path.LocalPath, vm.ExportSelected())
             with ex ->
-                vm.SetStatus ex.Message
+                vm.SetStatus(Tweaks, ex.Message)
         }
 
     member private this.ImportPreset(vm: MainWindowViewModel) =
@@ -76,7 +76,7 @@ type MainWindow() as this =
                         let json = File.ReadAllText(files.[0].Path.LocalPath)
                         vm.ImportJson json |> ignore
             with ex ->
-                vm.SetStatus ex.Message
+                vm.SetStatus(Tweaks, ex.Message)
         }
 
     member private this.OnExportClick(_: obj, _: RoutedEventArgs) =
