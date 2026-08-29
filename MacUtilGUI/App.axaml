@@ -1,8 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="MacUtilGUI.App"
+             Name="MacUtil"
              RequestedThemeVariant="Dark">
-    <!-- macOS-compliant dark theme optimized for AcrylicBlur -->
 
     <Application.DataTemplates>
         <!-- <local:ViewLocator /> -->
@@ -78,7 +78,6 @@
         <Style Selector="Button.macos-window-control:pressed">
             <Setter Property="Opacity" Value="0.6"/>
         </Style>
-        <!-- Consolidated Dark Theme Styles (works well with AcrylicBlur) -->
         <Style Selector="Border.macos-panel">
             <Setter Property="Background" Value="#E62C2C2E"/>
             <Setter Property="BorderBrush" Value="#B33A3A3C"/>

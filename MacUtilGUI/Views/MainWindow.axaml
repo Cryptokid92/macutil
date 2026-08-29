@@ -10,8 +10,8 @@
         Title="{Binding Title}"
         Width="1000" Height="700"
         MinWidth="800" MinHeight="600"
-        Background="Transparent"
-        TransparencyLevelHint="AcrylicBlur"
+        Background="#1C1C1E"
+        TransparencyLevelHint="None"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1">
