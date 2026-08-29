@@ -205,6 +205,90 @@
                     </Border>
                 </Grid>
             </TabItem>
+            <TabItem Header="Updates">
+                <Grid RowDefinitions="*,Auto">
+                    <ScrollViewer Grid.Row="0" Margin="24,16,24,8">
+                        <StackPanel>
+                            <TextBlock Text="Updates"
+                                       Classes="macos-title"
+                                       FontSize="18"
+                                       Margin="0,0,0,12"/>
+                            <TextBlock Text="{Binding SystemSettingsHelp}"
+                                       Classes="macos-secondary"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,0,16"/>
+                            <TextBlock Text="Apple"
+                                       Classes="macos-title"
+                                       FontSize="16"
+                                       Margin="0,0,0,12"/>
+                            <ItemsControl ItemsSource="{Binding AppleUpdates}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:AppleUpdateRowViewModel">
+                                        <CheckBox Classes="macos-tweak"
+                                                  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                  IsEnabled="{Binding IsEnabled}"
+                                                  Margin="0,0,0,8">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Content}"
+                                                           Classes="macos-body"
+                                                           TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Description}"
+                                                           Classes="macos-secondary"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="Homebrew"
+                                       Classes="macos-title"
+                                       FontSize="16"
+                                       Margin="0,20,0,12"/>
+                            <ItemsControl ItemsSource="{Binding BrewOutdated}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:BrewOutdatedRowViewModel">
+                                        <CheckBox Classes="macos-tweak"
+                                                  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                  Margin="0,0,0,8">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Content}"
+                                                           Classes="macos-body"
+                                                           TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Description}"
+                                                           Classes="macos-secondary"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Border Grid.Row="1" Padding="24,12" Background="#772C2C2E">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Content="Refresh"
+                                    Command="{Binding RefreshUpdatesCommand}"
+                                    Classes="macos-quiet"
+                                    Padding="20,10"/>
+                            <Button Content="Copy command"
+                                    Click="OnCopyUpdateClick"
+                                    Classes="macos-quiet"
+                                    Padding="20,10"/>
+                            <Button Content="Update Homebrew"
+                                    Command="{Binding UpdateHomebrewCommand}"
+                                    Classes="macos-accent"
+                                    Padding="20,10"/>
+                            <TextBlock Text="{Binding StatusText}"
+                                       Classes="macos-secondary"
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
     </Border>
