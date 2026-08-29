@@ -49,20 +49,43 @@
                                        Classes="macos-title"
                                        FontSize="18"
                                        Margin="0,0,0,12"/>
-                            <ItemsControl ItemsSource="{Binding SafeTweaks}">
+                            <ItemsControl ItemsSource="{Binding SafeTweakGroups}">
                                 <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:TweakRowViewModel">
-                                        <CheckBox Classes="macos-tweak"
-                                                  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                    <DataTemplate x:DataType="vm:TweakGroupViewModel">
+                                        <Expander IsExpanded="True"
+                                                  HorizontalAlignment="Stretch"
                                                   Margin="0,0,0,8">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Content}" Classes="macos-body"/>
-                                                <TextBlock Text="{Binding Description}"
-                                                           Classes="macos-secondary"
-                                                           FontSize="11"
-                                                           TextWrapping="Wrap"/>
-                                            </StackPanel>
-                                        </CheckBox>
+                                            <Expander.Header>
+                                                <DockPanel>
+                                                    <CheckBox DockPanel.Dock="Left"
+                                                              Classes="macos-tweak"
+                                                              IsChecked="{Binding AllSelected, Mode=TwoWay}"
+                                                              VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               Classes="macos-title"
+                                                               FontSize="16"
+                                                               VerticalAlignment="Center"
+                                                               Margin="8,0,0,0"/>
+                                                </DockPanel>
+                                            </Expander.Header>
+                                            <ItemsControl ItemsSource="{Binding Tweaks}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:TweakRowViewModel">
+                                                        <CheckBox Classes="macos-tweak"
+                                                                  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                                  Margin="0,0,0,8">
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding Content}" Classes="macos-body"/>
+                                                                <TextBlock Text="{Binding Description}"
+                                                                           Classes="macos-secondary"
+                                                                           FontSize="11"
+                                                                           TextWrapping="Wrap"/>
+                                                            </StackPanel>
+                                                        </CheckBox>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Expander>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -70,20 +93,43 @@
                                        Classes="macos-caution"
                                        FontSize="16"
                                        Margin="0,20,0,12"/>
-                            <ItemsControl ItemsSource="{Binding CautionTweaks}">
+                            <ItemsControl ItemsSource="{Binding CautionTweakGroups}">
                                 <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:TweakRowViewModel">
-                                        <CheckBox Classes="macos-tweak"
-                                                  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                    <DataTemplate x:DataType="vm:TweakGroupViewModel">
+                                        <Expander IsExpanded="True"
+                                                  HorizontalAlignment="Stretch"
                                                   Margin="0,0,0,8">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Content}" Classes="macos-body"/>
-                                                <TextBlock Text="{Binding Description}"
-                                                           Classes="macos-secondary"
-                                                           FontSize="11"
-                                                           TextWrapping="Wrap"/>
-                                            </StackPanel>
-                                        </CheckBox>
+                                            <Expander.Header>
+                                                <DockPanel>
+                                                    <CheckBox DockPanel.Dock="Left"
+                                                              Classes="macos-tweak"
+                                                              IsChecked="{Binding AllSelected, Mode=TwoWay}"
+                                                              VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               Classes="macos-title"
+                                                               FontSize="16"
+                                                               VerticalAlignment="Center"
+                                                               Margin="8,0,0,0"/>
+                                                </DockPanel>
+                                            </Expander.Header>
+                                            <ItemsControl ItemsSource="{Binding Tweaks}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:TweakRowViewModel">
+                                                        <CheckBox Classes="macos-tweak"
+                                                                  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                                  Margin="0,0,0,8">
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding Content}" Classes="macos-body"/>
+                                                                <TextBlock Text="{Binding Description}"
+                                                                           Classes="macos-secondary"
+                                                                           FontSize="11"
+                                                                           TextWrapping="Wrap"/>
+                                                            </StackPanel>
+                                                        </CheckBox>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Expander>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
