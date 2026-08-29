@@ -25,6 +25,10 @@ The program runs on Intel Macs and Apple Silicon Macs. MacUtil provides detect, 
 
 SIP stays on. The program never disables SIP. User-domain defaults never run as root. The engine never uses sudo for defaults write. The engine never uses osascript elevation for defaults write.
 
+## Maintenance
+
+Actions are brew-update, brew-cleanup, and user-cache-brew. The engine refuses a path under /var. brew cleanup twice is success. The engine never deletes /var/log. Emptying Trash is not a default Safe action.
+
 ## Action registry
 
 Tweaks and apps live in JSON under `config/`. That catalog is the Action registry.

@@ -19,7 +19,9 @@ type RelayCommand(canExecute: obj -> bool, execute: obj -> unit) =
 
     new(execute: obj -> unit) = RelayCommand((fun _ -> true), execute)
 
-type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IProcessKiller, brew: BrewExec) as this =
+type MainWindowViewModel
+    (catalog: Catalog, client: IDefaultsClient, killer: IProcessKiller, brew: BrewExec, cacheClear: CacheClear) as this
+    =
     inherit ViewModelBase()
 
     let mutable statusText: string = ""
@@ -137,11 +139,19 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
             setStatus (sprintf "Imported %d id(s)." ids.Length)
             true
 
+    let runMaintenance id =
+        match MaintenanceEngine.run brew cacheClear id with
+        | Ok msg -> setStatus msg
+        | Error msg -> setStatus msg
+
     let applyCommand = RelayCommand(fun _ -> applySelected ())
     let undoCommand = RelayCommand(fun _ -> undoSelected ())
     let installCommand = RelayCommand(fun _ -> installSelected ())
     let selectStandardCommand = RelayCommand(fun _ -> selectPreset "Standard")
     let selectMinimalCommand = RelayCommand(fun _ -> selectPreset "Minimal")
+    let brewUpdateCommand = RelayCommand(fun _ -> runMaintenance BrewUpdate)
+    let brewCleanupCommand = RelayCommand(fun _ -> runMaintenance BrewCleanup)
+    let userCacheBrewCommand = RelayCommand(fun _ -> runMaintenance UserCacheBrew)
 
     let categoryRank category =
         match category with
@@ -182,7 +192,10 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
 
         applyFilter ()
 
-    new(catalog, client, killer) = MainWindowViewModel(catalog, client, killer, fun _ -> 0, "", "")
+    new(catalog, client, killer, brew) = MainWindowViewModel(catalog, client, killer, brew, MaintenanceEngine.unixClear)
+
+    new(catalog, client, killer) =
+        MainWindowViewModel(catalog, client, killer, (fun _ -> 0, "", ""), MaintenanceEngine.unixClear)
 
     new() =
         let dir = Path.Combine(AppContext.BaseDirectory, "config")
@@ -191,7 +204,8 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
             ConfigLoader.load dir,
             UnixDefaultsClient() :> IDefaultsClient,
             UnixProcessKiller() :> IProcessKiller,
-            BrewClient.unixExec
+            BrewClient.unixExec,
+            MaintenanceEngine.unixClear
         )
 
     member _.SafeTweaks = safeTweaks
@@ -220,7 +234,15 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
 
     member _.UndoSelected() = undoSelected ()
 
+    member _.MaintenanceActions = MaintenanceEngine.catalog
+
     member _.InstallSelected() = installSelected ()
+
+    member _.RunBrewUpdate() = runMaintenance BrewUpdate
+
+    member _.RunBrewCleanup() = runMaintenance BrewCleanup
+
+    member _.RunUserCacheBrew() = runMaintenance UserCacheBrew
 
     member _.SelectStandard() = selectPreset "Standard"
 
@@ -241,5 +263,11 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
     member _.SelectStandardCommand = selectStandardCommand
 
     member _.SelectMinimalCommand = selectMinimalCommand
+
+    member _.BrewUpdateCommand = brewUpdateCommand
+
+    member _.BrewCleanupCommand = brewCleanupCommand
+
+    member _.UserCacheBrewCommand = userCacheBrewCommand
 
     member _.Title = "MacUtil"

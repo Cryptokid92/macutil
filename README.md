@@ -23,6 +23,8 @@ The window is opaque `#1C1C1E`. The menu bar says MacUtil.
 
 **Install.** 26 Homebrew apps from `config/applications.json`. Detect is `brew list`, not a name match in `/Applications`. Search filters the list. Empty Install writes nothing. No sudo.
 
+**Maintenance.** `brew update`, `brew cleanup`, and the user Homebrew cache from `brew --cache`. The engine refuses a path under `/var`. `brew cleanup` twice is success. Emptying Trash is not a default Safe action. No sudo.
+
 CLI commands share `ActionEngine`. No sudo.
 
 ```bash
@@ -48,6 +50,7 @@ dotnet test MacUtilGUI.Tests --configuration Release
 - Tweaks tab. Checkboxes bind to detect. Apply and Undo pass selected ids only.
 - Install tab. Checkboxes bind to brew. Search filters. No sudo brew.
 - Presets. `config/preset.json` names Standard (Safe Finder and Dock ids) and Minimal (a smaller Safe subset). Caution ids stay out. Import of an unknown id fails and writes nothing.
+- Maintenance tab. `brew-update`, `brew-cleanup`, and `user-cache-brew`. `MaintenanceEngine` refuses a path under `/var`. `brew cleanup` twice still calls brew and returns ok. Emptying Trash is not a default Safe action.
 - CLI. `dotnet run --project MacUtilCLI`. `detect` prints JSON of id to applied bool. `apply` and `undo` take `--preset`. `export` writes applied ids. `import` applies a JSON array of ids.
 - Opaque window. AcrylicBlur hid the window on Sequoia, so it is gone.
 - Universal CI. macos-13 publishes `osx-x64`. macos-14 publishes `osx-arm64` and lipos a universal zip. Release no longer tries to emit Mach-O from Ubuntu.
@@ -70,7 +73,6 @@ python3 -c 'import json; print(len(json.load(open("config/tweaks.json"))), len(j
 
 Not on `main` yet:
 
-- Maintenance tab. `brew update`, `brew cleanup`, and user Homebrew cache. Still no `/var/log`. Emptying Trash is not a default Safe action.
 - Updates tab. Lists `softwareupdate --list` and `brew outdated`. Does not run `softwareupdate --install`. A macOS major upgrade stays unchecked.
 
 ## License
