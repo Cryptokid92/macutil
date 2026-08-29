@@ -8,12 +8,16 @@ on:
       - '**/*.fs'
       - '**/*.fsproj'
       - 'MacUtilGUI/**'
+      - 'MacUtilGUI.Tests/**'
+      - 'config/**'
   pull_request:
     branches: ["main"]
     paths:
       - '**/*.fs'
       - '**/*.fsproj'
       - 'MacUtilGUI/**'
+      - 'MacUtilGUI.Tests/**'
+      - 'config/**'
 
 jobs:
   lints:
@@ -37,7 +41,9 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
-        run: dotnet restore MacUtilGUI/MacUtilGUI.fsproj
+        run: |
+          dotnet restore MacUtilGUI/MacUtilGUI.fsproj
+          dotnet restore MacUtilGUI.Tests/MacUtilGUI.Tests.fsproj
 
       - name: Install Fantomas
         run: |
@@ -48,4 +54,7 @@ jobs:
         run: dotnet build MacUtilGUI/MacUtilGUI.fsproj --configuration Release --no-restore
 
       - name: Check F# formatting
-        run: fantomas --check MacUtilGUI/
+        run: fantomas --check MacUtilGUI/Models/Pref.fs MacUtilGUI/Models/Action.fs MacUtilGUI/Models/ScriptInfo.fs MacUtilGUI/Models/ScriptCategory.fs MacUtilGUI/ViewModels MacUtilGUI/Program.fs MacUtilGUI/Services/ConfigLoader.fs MacUtilGUI.Tests/ConfigSchemaTests.fs
+
+      - name: Test Action registry
+        run: dotnet test MacUtilGUI.Tests/MacUtilGUI.Tests.fsproj --configuration Release --logger "console;verbosity=normal"

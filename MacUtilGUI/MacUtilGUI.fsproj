@@ -41,6 +41,9 @@
     <Folder Include="Models\" />
     <Compile Include="Models\ScriptInfo.fs" />
     <Compile Include="Models\ScriptCategory.fs" />
+    <Compile Include="Models\Pref.fs" />
+    <Compile Include="Models\Action.fs" />
+    <Compile Include="Services\ConfigLoader.fs" />
     <Compile Include="Services\ScriptService.fs" />
     <Compile Include="ViewModels\ViewModelBase.fs" />
     <Compile Include="ViewModels\MainWindowViewModel.fs" />
@@ -53,13 +56,11 @@
     <PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10" />
     <PackageReference Include="Tomlyn" Version="0.17.0" />
     <PackageReference Include="Dotnet.Bundle" Version="*" />
   </ItemGroup>
 
-  <!-- Trim-friendly settings for Avalonia -->
   <ItemGroup>
     <TrimmerRootAssembly Include="Avalonia" />
     <TrimmerRootAssembly Include="Avalonia.Desktop" />
@@ -70,10 +71,13 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
-  <!-- Include scripts as embedded resources -->
   <ItemGroup>
     <EmbeddedResource Include="../scripts/**/*.sh" />
     <EmbeddedResource Include="../scripts/**/*.toml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\config\*.json" CopyToOutputDirectory="PreserveNewest" Link="config\%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>
