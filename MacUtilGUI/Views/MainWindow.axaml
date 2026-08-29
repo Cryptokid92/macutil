@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MacUtilGUI.ViewModels"
+        xmlns:svc="using:MacUtilGUI.Services"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
@@ -152,6 +153,50 @@
                             <Button Content="Install"
                                     Command="{Binding InstallCommand}"
                                     Classes="macos-accent"
+                                    Padding="20,10"/>
+                            <TextBlock Text="{Binding StatusText}"
+                                       Classes="macos-secondary"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Maintenance">
+                <Grid RowDefinitions="*,Auto">
+                    <ScrollViewer Grid.Row="0" Margin="24,16,24,8">
+                        <StackPanel>
+                            <TextBlock Text="Maintenance"
+                                       Classes="macos-title"
+                                       FontSize="18"
+                                       Margin="0,0,0,12"/>
+                            <ItemsControl ItemsSource="{Binding MaintenanceActions}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="svc:MaintenanceAction">
+                                        <StackPanel Margin="0,0,0,16">
+                                            <TextBlock Text="{Binding Content}" Classes="macos-body"/>
+                                            <TextBlock Text="{Binding Description}"
+                                                       Classes="macos-secondary"
+                                                       FontSize="11"
+                                                       TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Border Grid.Row="1" Padding="24,12" Background="#772C2C2E">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Content="Brew update"
+                                    Command="{Binding BrewUpdateCommand}"
+                                    Classes="macos-quiet"
+                                    Padding="20,10"/>
+                            <Button Content="Brew cleanup"
+                                    Command="{Binding BrewCleanupCommand}"
+                                    Classes="macos-accent"
+                                    Padding="20,10"/>
+                            <Button Content="Homebrew cache"
+                                    Command="{Binding UserCacheBrewCommand}"
+                                    Classes="macos-quiet"
                                     Padding="20,10"/>
                             <TextBlock Text="{Binding StatusText}"
                                        Classes="macos-secondary"
