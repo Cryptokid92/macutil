@@ -148,13 +148,11 @@ type MainWindowViewModel(catalog: Catalog, client: IDefaultsClient, killer: IPro
         |> Map.toSeq
         |> Seq.map snd
         |> Seq.sortBy (fun app -> appCategoryRank app.Category, app.Content)
-        |> Seq.iter (fun app ->
-            allApps.Add(AppRowViewModel(app, BrewClient.installed brew app)))
+        |> Seq.iter (fun app -> allApps.Add(AppRowViewModel(app, BrewClient.installed brew app)))
 
         applyFilter ()
 
-    new(catalog, client, killer) =
-        MainWindowViewModel(catalog, client, killer, fun _ -> 0, "", "")
+    new(catalog, client, killer) = MainWindowViewModel(catalog, client, killer, fun _ -> 0, "", "")
 
     new() =
         let dir = Path.Combine(AppContext.BaseDirectory, "config")
