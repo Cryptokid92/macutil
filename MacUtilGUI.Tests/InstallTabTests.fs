@@ -49,7 +49,8 @@ module InstallTabTests =
 
         vm.InstallSelected()
         Assert.Empty(brew.InstallCalls)
-        Assert.Equal("Nothing is selected.", vm.StatusText)
+        Assert.Equal("Nothing is selected.", vm.InstallStatus)
+        Assert.Equal("", vm.TweaksStatus)
         Assert.Empty(vm.SelectedAppIds)
 
     [<Fact>]
@@ -60,7 +61,8 @@ module InstallTabTests =
 
         vm.UninstallSelected()
         Assert.Empty(brew.UninstallCalls)
-        Assert.Equal("Nothing is selected.", vm.StatusText)
+        Assert.Equal("Nothing is selected.", vm.InstallStatus)
+        Assert.Equal("", vm.TweaksStatus)
         Assert.Empty(vm.SelectedAppIds)
 
     [<Fact>]

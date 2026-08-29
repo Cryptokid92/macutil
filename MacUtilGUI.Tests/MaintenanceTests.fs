@@ -92,7 +92,9 @@ module MaintenanceTests =
         let brew = RecordingBrew("/tmp/macutil-not-used")
         let vm = makeVm brew
         vm.RunBrewCleanup()
-        Assert.Equal("Ran brew cleanup.", vm.StatusText)
+        Assert.Equal("Ran brew cleanup.", vm.MaintenanceStatus)
+        Assert.Equal("", vm.TweaksStatus)
+        Assert.Equal("", vm.InstallStatus)
         Assert.Equal(1, brew.CleanupCalls.Length)
         Assert.NotEmpty(vm.SafeTweaks)
         Assert.Equal(26, Seq.length vm.AllApps)
