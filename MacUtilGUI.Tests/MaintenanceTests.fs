@@ -21,6 +21,8 @@ module MaintenanceTests =
             | [ "update" ] -> 0, "Already up-to-date.", ""
             | [ "cleanup" ] -> 0, "", ""
             | [ "--cache" ] -> 0, cachePath, ""
+            | [ "outdated" ]
+            | [ "outdated"; "--verbose" ] -> 0, "", ""
             | _ -> 1, "", "unexpected brew args"
 
     let private catalog () =
