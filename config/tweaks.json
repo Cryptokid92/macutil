@@ -1,4 +1,55 @@
 {
+  "finder-list-view": {
+    "content": "Use list view in Finder",
+    "description": "Set new Finder windows to list view.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "FXPreferredViewStyle",
+        "type": "text",
+        "apply": "Nlsv",
+        "OriginalValue": "icnv"
+      }
+    ],
+    "appleDefault": "icnv",
+    "reload": "Finder",
+    "risk": "Safe"
+  },
+  "finder-search-current-folder": {
+    "content": "Search the current folder",
+    "description": "Search the current folder instead of This Mac.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "FXDefaultSearchScope",
+        "type": "text",
+        "apply": "SCcf",
+        "OriginalValue": "SCev"
+      }
+    ],
+    "appleDefault": "SCev",
+    "reload": "Finder",
+    "risk": "Safe"
+  },
+  "finder-empty-trash-30d": {
+    "content": "Empty Trash after 30 days",
+    "description": "Remove items from Trash after 30 days.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "FXRemoveOldTrashItems",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Finder",
+    "risk": "Safe"
+  },
   "finder-show-extensions": {
     "content": "Show all filename extensions",
     "description": "Show file extensions in Finder windows and on the desktop.",
@@ -15,5 +66,515 @@
     "appleDefault": false,
     "reload": "Finder",
     "risk": "Safe"
+  },
+  "finder-status-bar": {
+    "content": "Show status bar",
+    "description": "Show the status bar at the bottom of Finder windows.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "ShowStatusBar",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Finder",
+    "risk": "Safe"
+  },
+  "finder-path-bar": {
+    "content": "Show path bar",
+    "description": "Show the path bar at the bottom of Finder windows.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "ShowPathbar",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Finder",
+    "risk": "Safe"
+  },
+  "finder-show-hidden": {
+    "content": "Show hidden files",
+    "description": "Show hidden files in Finder.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "AppleShowAllFiles",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Finder",
+    "risk": "Safe"
+  },
+  "finder-folders-first": {
+    "content": "Keep folders on top",
+    "description": "Sort folders before files in Finder windows.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "_FXSortFoldersFirst",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Finder",
+    "risk": "Safe"
+  },
+  "finder-no-ext-warning": {
+    "content": "Do not warn on extension change",
+    "description": "Skip the warning when changing a file extension.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "FXEnableExtensionChangeWarning",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "Finder",
+    "risk": "Safe"
+  },
+  "finder-posix-title": {
+    "content": "Show POSIX path in title",
+    "description": "Show the full POSIX path in the Finder window title.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "com.apple.finder",
+        "key": "_FXShowPosixPathInTitle",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Finder",
+    "risk": "Safe"
+  },
+  "dock-no-mru-spaces": {
+    "content": "Do not rearrange Spaces",
+    "description": "Keep Spaces in a fixed order instead of most-recently used.",
+    "category": "Dock",
+    "writes": [
+      {
+        "domain": "com.apple.dock",
+        "key": "mru-spaces",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "Dock",
+    "risk": "Safe"
+  },
+  "dock-autohide": {
+    "content": "Automatically hide the Dock",
+    "description": "Hide the Dock until the pointer reaches the screen edge.",
+    "category": "Dock",
+    "writes": [
+      {
+        "domain": "com.apple.dock",
+        "key": "autohide",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Dock",
+    "risk": "Safe"
+  },
+  "dock-autohide-delay-0": {
+    "content": "Remove Dock autohide delay",
+    "description": "Show the Dock immediately, with no autohide delay.",
+    "category": "Dock",
+    "writes": [
+      {
+        "domain": "com.apple.dock",
+        "key": "autohide-delay",
+        "type": "float",
+        "apply": 0.0,
+        "OriginalValue": 0.5
+      }
+    ],
+    "appleDefault": 0.5,
+    "reload": "Dock",
+    "risk": "Safe"
+  },
+  "dock-autohide-time-0": {
+    "content": "Remove Dock autohide animation",
+    "description": "Hide and show the Dock with no animation time.",
+    "category": "Dock",
+    "writes": [
+      {
+        "domain": "com.apple.dock",
+        "key": "autohide-time-modifier",
+        "type": "float",
+        "apply": 0.0,
+        "OriginalValue": 0.5
+      }
+    ],
+    "appleDefault": 0.5,
+    "reload": "Dock",
+    "risk": "Safe"
+  },
+  "dock-hide-recents": {
+    "content": "Hide recent apps in the Dock",
+    "description": "Do not show recent applications in the Dock.",
+    "category": "Dock",
+    "writes": [
+      {
+        "domain": "com.apple.dock",
+        "key": "show-recents",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "Dock",
+    "risk": "Safe"
+  },
+  "dock-no-launch-anim": {
+    "content": "Disable Dock launch animation",
+    "description": "Do not bounce app icons when launching from the Dock.",
+    "category": "Dock",
+    "writes": [
+      {
+        "domain": "com.apple.dock",
+        "key": "launchanim",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "Dock",
+    "risk": "Safe"
+  },
+  "dock-min-to-app": {
+    "content": "Minimize windows into the app icon",
+    "description": "Minimize windows into their application icon instead of a new Dock tile.",
+    "category": "Dock",
+    "writes": [
+      {
+        "domain": "com.apple.dock",
+        "key": "minimize-to-application",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Dock",
+    "risk": "Safe"
+  },
+  "kbd-key-repeat": {
+    "content": "Enable key repeat instead of press-and-hold",
+    "description": "Repeat the held key instead of showing the accent menu.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "ApplePressAndHoldEnabled",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "kbd-no-autocap": {
+    "content": "Disable automatic capitalization",
+    "description": "Do not capitalize the first word of a sentence automatically.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "NSAutomaticCapitalizationEnabled",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "kbd-no-period": {
+    "content": "Disable double-space period",
+    "description": "Do not insert a period when pressing space twice.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "NSAutomaticPeriodSubstitutionEnabled",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "kbd-no-dash": {
+    "content": "Disable smart dashes",
+    "description": "Do not replace hyphens with typographic dashes.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "NSAutomaticDashSubstitutionEnabled",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "kbd-no-quotes": {
+    "content": "Disable smart quotes",
+    "description": "Do not replace straight quotes with typographic quotes.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "NSAutomaticQuoteSubstitutionEnabled",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "kbd-no-autocorrect": {
+    "content": "Disable autocorrect",
+    "description": "Do not correct spelling automatically.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "NSAutomaticSpellingCorrectionEnabled",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "kbd-full-access": {
+    "content": "Full keyboard access",
+    "description": "Move focus between all controls with the keyboard.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "AppleKeyboardUIMode",
+        "type": "int",
+        "apply": 3,
+        "OriginalValue": 0
+      }
+    ],
+    "appleDefault": 0,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "screenshot-no-shadow": {
+    "content": "Disable screenshot drop shadow",
+    "description": "Save window screenshots without a drop shadow.",
+    "category": "Screenshots",
+    "writes": [
+      {
+        "domain": "com.apple.screencapture",
+        "key": "disable-shadow",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "screenshot-type-png": {
+    "content": "Save screenshots as PNG",
+    "description": "Write screenshots as PNG files.",
+    "category": "Screenshots",
+    "writes": [
+      {
+        "domain": "com.apple.screencapture",
+        "key": "type",
+        "type": "text",
+        "apply": "png",
+        "OriginalValue": "png"
+      }
+    ],
+    "appleDefault": "png",
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "privacy-no-ad-tracking": {
+    "content": "Disable Apple personalized ads",
+    "description": "Do not allow Apple personalized advertising.",
+    "category": "Privacy",
+    "writes": [
+      {
+        "domain": "com.apple.AdLib",
+        "key": "allowApplePersonalizedAdvertising",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "privacy-save-not-icloud": {
+    "content": "Save new documents to disk, not iCloud",
+    "description": "Save new documents to disk instead of iCloud.",
+    "category": "Privacy",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "NSDocumentSaveNewDocumentsToCloud",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "privacy-no-dsstore-network": {
+    "content": "Do not write .DS_Store on network volumes",
+    "description": "Skip .DS_Store files on network volumes.",
+    "category": "Privacy",
+    "writes": [
+      {
+        "domain": "com.apple.desktopservices",
+        "key": "DSDontWriteNetworkStores",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "privacy-no-dsstore-usb": {
+    "content": "Do not write .DS_Store on USB volumes",
+    "description": "Skip .DS_Store files on USB volumes.",
+    "category": "Privacy",
+    "writes": [
+      {
+        "domain": "com.apple.desktopservices",
+        "key": "DSDontWriteUSBStores",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "none",
+    "risk": "Safe"
+  },
+  "kbd-repeat-rate": {
+    "content": "Faster key repeat rate",
+    "description": "Set KeyRepeat to 2. Lower is faster. Apple default is 6.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "KeyRepeat",
+        "type": "int",
+        "apply": 2,
+        "OriginalValue": 6
+      }
+    ],
+    "appleDefault": 6,
+    "reload": "none",
+    "risk": "Caution"
+  },
+  "kbd-repeat-delay": {
+    "content": "Shorter key repeat delay",
+    "description": "Set InitialKeyRepeat to 15. Lower is faster. Apple default is 25.",
+    "category": "Keyboard",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "InitialKeyRepeat",
+        "type": "int",
+        "apply": 15,
+        "OriginalValue": 25
+      }
+    ],
+    "appleDefault": 25,
+    "reload": "none",
+    "risk": "Caution"
+  },
+  "screenshot-no-thumbnail": {
+    "content": "Disable screenshot thumbnail",
+    "description": "Do not show the floating screenshot thumbnail.",
+    "category": "Screenshots",
+    "writes": [
+      {
+        "domain": "com.apple.screencapture",
+        "key": "show-thumbnail",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Caution"
+  },
+  "privacy-apple-intelligence-off": {
+    "content": "Opt out of Apple Intelligence",
+    "description": "Write the Sequoia Apple Intelligence opt-out key. A missing key is not off.",
+    "category": "Privacy",
+    "writes": [
+      {
+        "domain": "com.apple.CloudSubscriptionFeatures.optIn",
+        "key": "545129924",
+        "type": "bool",
+        "apply": false,
+        "OriginalValue": true
+      }
+    ],
+    "appleDefault": true,
+    "reload": "none",
+    "risk": "Caution"
   }
 }
