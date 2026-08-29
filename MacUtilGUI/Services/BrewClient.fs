@@ -55,6 +55,29 @@ module BrewClient =
                     Ok()
                 | _, _, stderr -> Error(stderr.Trim())
 
+    let uninstall (exec: BrewExec) (app: AppEntry) =
+        if not (installed exec app) then
+            Ok()
+        else
+            match pkg app with
+            | None -> Error $"App '{app.Id}' has no cask or formula"
+            | Some token ->
+                let args =
+                    match token with
+                    | Cask name -> [ "uninstall"; "--cask"; name ]
+                    | Formula name -> [ "uninstall"; "--formula"; name ]
+
+                match exec args with
+                | 0, _, _ -> Ok()
+                | _, _, stderr when
+                    stderr.IndexOf("not installed", StringComparison.OrdinalIgnoreCase)
+                    >= 0
+                    || stderr.IndexOf("No such keg", StringComparison.OrdinalIgnoreCase)
+                       >= 0
+                    ->
+                    Ok()
+                | _, _, stderr -> Error(stderr.Trim())
+
     let private brewPath () =
         [ "/opt/homebrew/bin/brew"; "/usr/local/bin/brew" ]
         |> List.tryFind File.Exists

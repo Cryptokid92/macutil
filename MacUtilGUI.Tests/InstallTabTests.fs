@@ -53,6 +53,37 @@ module InstallTabTests =
         Assert.Empty(vm.SelectedAppIds)
 
     [<Fact>]
+    let EmptyUninstallWritesNothing () =
+        let brew = BrewClientTests.FakeBrew([ "visual-studio-code" ], [])
+        let vm = makeVm brew
+        uncheckAll vm
+
+        vm.UninstallSelected()
+        Assert.Empty(brew.UninstallCalls)
+        Assert.Equal("Nothing is selected.", vm.StatusText)
+        Assert.Empty(vm.SelectedAppIds)
+
+    [<Fact>]
+    let RefreshDetectChecksBox () =
+        let brew = BrewClientTests.FakeBrew([ "visual-studio-code" ], [ "neovim" ])
+        let vm = makeVm brew
+        let vscode = findApp vm.AllApps "visual-studio-code"
+        let neovim = findApp vm.AllApps "neovim"
+        let discord = findApp vm.AllApps "discord"
+
+        Assert.True(vscode.IsChecked)
+        Assert.True(neovim.IsChecked)
+        Assert.False(discord.IsChecked)
+
+        brew.SetCasks []
+        brew.SetFormulas [ "neovim" ]
+        vm.RefreshInstalled()
+
+        Assert.False(vscode.IsChecked)
+        Assert.True(neovim.IsChecked)
+        Assert.False(discord.IsChecked)
+
+    [<Fact>]
     let SearchFiltersList () =
         let brew = BrewClientTests.FakeBrew([], [])
         let vm = makeVm brew
