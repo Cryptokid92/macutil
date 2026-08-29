@@ -88,3 +88,14 @@ type MainWindow() as this =
         match this.DataContext with
         | :? MainWindowViewModel as vm -> this.ImportPreset vm |> ignore
         | _ -> ()
+
+    member private this.OnCopyUpdateClick(_: obj, _: RoutedEventArgs) =
+        match this.DataContext with
+        | :? MainWindowViewModel as vm ->
+            vm.CopySystemSettings()
+
+            match TopLevel.GetTopLevel(this) with
+            | null -> ()
+            | top when isNull top.Clipboard -> ()
+            | top -> top.Clipboard.SetTextAsync(vm.SystemSettingsCommand) |> ignore
+        | _ -> ()

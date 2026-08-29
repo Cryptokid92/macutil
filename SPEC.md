@@ -50,3 +50,11 @@ undo restores OriginalValue. If original is absent, undo deletes the key.
 reload names Finder or Dock after a successful write.
 
 risk is Safe or Caution. Standard presets include only Safe ids.
+
+## Updates
+
+The Updates tab lists `softwareupdate --list` and `brew outdated`.
+
+A row whose label or title contains macOS Tahoe is a major upgrade. Major rows stay unchecked. The program never passes an install flag to softwareupdate.
+
+v1 lists Apple updates and points at System Settings, General, Software Update. Homebrew outdated packages update only when the user selects them and runs Update Homebrew.

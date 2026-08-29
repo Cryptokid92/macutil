@@ -47,9 +47,11 @@
     <Compile Include="Services\BrewClient.fs" />
     <Compile Include="Services\PresetService.fs" />
     <Compile Include="Services\MaintenanceEngine.fs" />
+    <Compile Include="Services\UpdateService.fs" />
     <Compile Include="ViewModels\ViewModelBase.fs" />
     <Compile Include="ViewModels\TweakRowViewModel.fs" />
     <Compile Include="ViewModels\AppRowViewModel.fs" />
+    <Compile Include="ViewModels\UpdateRowViewModel.fs" />
     <Compile Include="ViewModels\MainWindowViewModel.fs" />
     <Compile Include="Views\MainWindow.axaml.fs" />
     <Compile Include="Program.fs" />
