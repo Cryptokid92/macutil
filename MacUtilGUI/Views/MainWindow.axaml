@@ -161,7 +161,7 @@
                                     Click="OnImportClick"
                                     Classes="macos-quiet"
                                     Padding="20,10"/>
-                            <TextBlock Text="{Binding StatusText}"
+                            <TextBlock Text="{Binding TweaksStatus}"
                                        Classes="macos-secondary"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
@@ -231,7 +231,7 @@
                                     Command="{Binding RefreshInstalledCommand}"
                                     Classes="macos-quiet"
                                     Padding="20,10"/>
-                            <TextBlock Text="{Binding StatusText}"
+                            <TextBlock Text="{Binding InstallStatus}"
                                        Classes="macos-secondary"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
@@ -275,7 +275,7 @@
                                     Command="{Binding UserCacheBrewCommand}"
                                     Classes="macos-quiet"
                                     Padding="20,10"/>
-                            <TextBlock Text="{Binding StatusText}"
+                            <TextBlock Text="{Binding MaintenanceStatus}"
                                        Classes="macos-secondary"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
@@ -358,7 +358,7 @@
                                     Command="{Binding UpdateHomebrewCommand}"
                                     Classes="macos-accent"
                                     Padding="20,10"/>
-                            <TextBlock Text="{Binding StatusText}"
+                            <TextBlock Text="{Binding UpdatesStatus}"
                                        Classes="macos-secondary"
                                        VerticalAlignment="Center"
                                        TextWrapping="Wrap"/>
