@@ -20,8 +20,14 @@ type RelayCommand(canExecute: obj -> bool, execute: obj -> unit) =
     new(execute: obj -> unit) = RelayCommand((fun _ -> true), execute)
 
 type MainWindowViewModel
-    (catalog: Catalog, client: IDefaultsClient, killer: IProcessKiller, brew: BrewExec, cacheClear: CacheClear) as this
-    =
+    (
+        catalog: Catalog,
+        client: IDefaultsClient,
+        killer: IProcessKiller,
+        brew: BrewExec,
+        cacheClear: CacheClear,
+        listApple: SoftwareUpdateList
+    ) as this =
     inherit ViewModelBase()
 
     let mutable statusText: string = ""
@@ -30,6 +36,8 @@ type MainWindowViewModel
     let cautionTweaks = ObservableCollection<TweakRowViewModel>()
     let allApps = ResizeArray<AppRowViewModel>()
     let apps = ObservableCollection<AppRowViewModel>()
+    let appleUpdates = ObservableCollection<AppleUpdateRowViewModel>()
+    let brewOutdated = ObservableCollection<BrewOutdatedRowViewModel>()
 
     let allRows () = Seq.append safeTweaks cautionTweaks
 
@@ -144,6 +152,46 @@ type MainWindowViewModel
         | Ok msg -> setStatus msg
         | Error msg -> setStatus msg
 
+    let combinedOutput stdout stderr = stdout + "\n" + stderr
+
+    let refreshUpdates report =
+        appleUpdates.Clear()
+        brewOutdated.Clear()
+
+        let _, stdout, stderr = listApple ()
+
+        for update in UpdateService.parseSoftwareUpdateList (combinedOutput stdout stderr) do
+            appleUpdates.Add(AppleUpdateRowViewModel(update))
+
+        let _, brewOut, brewErr = brew [ "outdated"; "--verbose" ]
+
+        for pkg in UpdateService.parseBrewOutdated (combinedOutput brewOut brewErr) do
+            brewOutdated.Add(BrewOutdatedRowViewModel(pkg))
+
+        if report then
+            setStatus (
+                sprintf "Listed %d Apple update(s) and %d Homebrew package(s)." appleUpdates.Count brewOutdated.Count
+            )
+
+    let copySystemSettings () =
+        setStatus UpdateService.systemSettingsHelp
+
+    let updateBrewSelected () =
+        let selected =
+            brewOutdated
+            |> Seq.filter (fun row -> row.IsChecked)
+            |> Seq.map (fun row -> row.Name)
+            |> Seq.toList
+
+        if selected.IsEmpty then
+            setStatus "Nothing is selected."
+        else
+            match UpdateService.upgradeBrew brew selected with
+            | Ok msg ->
+                refreshUpdates false
+                setStatus msg
+            | Error msg -> setStatus msg
+
     let applyCommand = RelayCommand(fun _ -> applySelected ())
     let undoCommand = RelayCommand(fun _ -> undoSelected ())
     let installCommand = RelayCommand(fun _ -> installSelected ())
@@ -152,6 +200,9 @@ type MainWindowViewModel
     let brewUpdateCommand = RelayCommand(fun _ -> runMaintenance BrewUpdate)
     let brewCleanupCommand = RelayCommand(fun _ -> runMaintenance BrewCleanup)
     let userCacheBrewCommand = RelayCommand(fun _ -> runMaintenance UserCacheBrew)
+    let refreshUpdatesCommand = RelayCommand(fun _ -> refreshUpdates true)
+    let copySystemSettingsCommand = RelayCommand(fun _ -> copySystemSettings ())
+    let updateHomebrewCommand = RelayCommand(fun _ -> updateBrewSelected ())
 
     let categoryRank category =
         match category with
@@ -191,6 +242,10 @@ type MainWindowViewModel
         |> Seq.iter (fun app -> allApps.Add(AppRowViewModel(app, BrewClient.installed brew app)))
 
         applyFilter ()
+        refreshUpdates false
+
+    new(catalog, client, killer, brew, cacheClear) =
+        MainWindowViewModel(catalog, client, killer, brew, cacheClear, fun () -> 0, "", "")
 
     new(catalog, client, killer, brew) = MainWindowViewModel(catalog, client, killer, brew, MaintenanceEngine.unixClear)
 
@@ -205,7 +260,8 @@ type MainWindowViewModel
             UnixDefaultsClient() :> IDefaultsClient,
             UnixProcessKiller() :> IProcessKiller,
             BrewClient.unixExec,
-            MaintenanceEngine.unixClear
+            MaintenanceEngine.unixClear,
+            UpdateService.unixList
         )
 
     member _.SafeTweaks = safeTweaks
@@ -269,5 +325,25 @@ type MainWindowViewModel
     member _.BrewCleanupCommand = brewCleanupCommand
 
     member _.UserCacheBrewCommand = userCacheBrewCommand
+
+    member _.RefreshUpdatesCommand = refreshUpdatesCommand
+
+    member _.CopySystemSettingsCommand = copySystemSettingsCommand
+
+    member _.UpdateHomebrewCommand = updateHomebrewCommand
+
+    member _.AppleUpdates = appleUpdates
+
+    member _.BrewOutdated = brewOutdated
+
+    member _.SystemSettingsHelp = UpdateService.systemSettingsHelp
+
+    member _.SystemSettingsCommand = UpdateService.systemSettingsCommand
+
+    member _.RefreshUpdates() = refreshUpdates true
+
+    member _.CopySystemSettings() = copySystemSettings ()
+
+    member _.UpdateHomebrew() = updateBrewSelected ()
 
     member _.Title = "MacUtil"
