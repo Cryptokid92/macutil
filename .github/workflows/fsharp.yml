@@ -43,6 +43,7 @@ jobs:
       - name: Restore dependencies
         run: |
           dotnet restore MacUtilGUI/MacUtilGUI.fsproj
+          dotnet restore MacUtilCLI/MacUtilCLI.fsproj
           dotnet restore MacUtilGUI.Tests/MacUtilGUI.Tests.fsproj
 
       - name: Install Fantomas
@@ -51,7 +52,9 @@ jobs:
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Build project
-        run: dotnet build MacUtilGUI/MacUtilGUI.fsproj --configuration Release --no-restore
+        run: |
+          dotnet build MacUtilGUI/MacUtilGUI.fsproj --configuration Release --no-restore
+          dotnet build MacUtilCLI/MacUtilCLI.fsproj --configuration Release --no-restore
 
       - name: Check F# formatting
         run: fantomas --check MacUtilGUI/Models/Pref.fs MacUtilGUI/Models/Action.fs MacUtilGUI/ViewModels MacUtilGUI/Program.fs MacUtilGUI/Services/ConfigLoader.fs MacUtilGUI.Tests/ConfigSchemaTests.fs
