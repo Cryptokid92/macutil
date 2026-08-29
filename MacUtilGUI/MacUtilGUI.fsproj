@@ -46,6 +46,7 @@
     <Compile Include="Services\ConfigLoader.fs" />
     <Compile Include="Services\DefaultsClient.fs" />
     <Compile Include="Services\ActionEngine.fs" />
+    <Compile Include="Services\BrewClient.fs" />
     <Compile Include="Services\ScriptService.fs" />
     <Compile Include="ViewModels\ViewModelBase.fs" />
     <Compile Include="ViewModels\MainWindowViewModel.fs" />
