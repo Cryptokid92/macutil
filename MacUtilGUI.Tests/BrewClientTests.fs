@@ -7,16 +7,30 @@ open MacUtilGUI.Services
 module BrewClientTests =
 
     type FakeBrew(casks: string list, formulas: string list, ?outdated: string list) =
+        let mutable casks = casks
+        let mutable formulas = formulas
         let outdated = defaultArg outdated []
         let calls = ResizeArray<string list>()
 
         member _.Calls = List.ofSeq calls
+
+        member _.SetCasks xs = casks <- xs
+
+        member _.SetFormulas xs = formulas <- xs
 
         member _.InstallCalls =
             calls
             |> Seq.filter (fun args ->
                 match args with
                 | "install" :: _ -> true
+                | _ -> false)
+            |> Seq.toList
+
+        member _.UninstallCalls =
+            calls
+            |> Seq.filter (fun args ->
+                match args with
+                | "uninstall" :: _ -> true
                 | _ -> false)
             |> Seq.toList
 
@@ -37,6 +51,7 @@ module BrewClientTests =
             | [ "outdated" ]
             | [ "outdated"; "--verbose" ] -> 0, String.concat "\n" outdated, ""
             | "install" :: _ -> 0, "", ""
+            | "uninstall" :: _ -> 0, "", ""
             | "upgrade" :: _ -> 0, "", ""
             | _ -> 1, "", "unexpected brew args"
 
@@ -67,3 +82,23 @@ module BrewClientTests =
         | Error msg -> Assert.Fail msg
 
         Assert.Empty(brew.InstallCalls)
+
+    [<Fact>]
+    let UninstallMissingIsOk () =
+        let brew = FakeBrew([], [])
+
+        match BrewClient.uninstall brew.Exec vscode with
+        | Ok() -> ()
+        | Error msg -> Assert.Fail msg
+
+        Assert.Empty(brew.UninstallCalls)
+
+    [<Fact>]
+    let UninstallUsesCaskToken () =
+        let brew = FakeBrew([ "visual-studio-code" ], [])
+
+        match BrewClient.uninstall brew.Exec vscode with
+        | Ok() -> ()
+        | Error msg -> Assert.Fail msg
+
+        Assert.Contains([ "uninstall"; "--cask"; "visual-studio-code" ], brew.UninstallCalls)
