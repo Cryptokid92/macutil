@@ -46,15 +46,12 @@
     <Compile Include="Services\ConfigLoader.fs" />
     <Compile Include="Services\DefaultsClient.fs" />
     <Compile Include="Services\ActionEngine.fs" />
+    <Compile Include="Services\BrewClient.fs" />
     <Compile Include="Services\ScriptService.fs" />
     <Compile Include="ViewModels\ViewModelBase.fs" />
     <Compile Include="ViewModels\MainWindowViewModel.fs" />
     <Compile Include="Views\MainWindow.axaml.fs" />
     <Compile Include="Program.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Services\BrewClient.fs" />
   </ItemGroup>
 
   <ItemGroup>
