@@ -168,5 +168,13 @@
         <Style Selector="Button.macos-quiet:pointerover">
             <Setter Property="Background" Value="#48484A"/>
         </Style>
+
+        <Style Selector="TextBox.macos-search">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#3A3A3C"/>
+            <Setter Property="BorderBrush" Value="#48484A"/>
+            <Setter Property="CaretBrush" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="10,8"/>
+        </Style>
     </Application.Styles>
 </Application>
