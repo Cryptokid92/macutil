@@ -10,7 +10,7 @@ echo
 APP_NAME="MacUtilGUI"
 BUNDLE_NAME="MacUtil"
 BUNDLE_IDENTIFIER="com.macutil.gui"
-VERSION="0.2.0"
+VERSION="0.2.1"
 COPYRIGHT="Copyright © 2025 CT Tech Group LLC. All rights reserved."
 
 # Colors for output

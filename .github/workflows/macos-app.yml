@@ -1,0 +1,200 @@
+name: macOS App
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "MacUtilGUI/**"
+      - "config/**"
+      - "scripts/check-version.sh"
+      - ".github/workflows/macos-app.yml"
+      - ".github/workflows/Release.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "MacUtilGUI/**"
+      - "config/**"
+      - "scripts/check-version.sh"
+      - ".github/workflows/macos-app.yml"
+      - ".github/workflows/Release.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  macos-13:
+    name: macos-13
+    runs-on: macos-13
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Cache .NET packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Check version lock
+        run: bash scripts/check-version.sh
+
+      - name: Publish osx-x64
+        run: |
+          set -euo pipefail
+          dotnet publish MacUtilGUI/MacUtilGUI.fsproj \
+            --configuration Release \
+            --runtime osx-x64 \
+            --self-contained true \
+            --output ./build/osx-x64 \
+            /p:PublishSingleFile=true \
+            /p:IncludeNativeLibrariesForSelfExtract=true
+          file ./build/osx-x64/MacUtilGUI
+          lipo -info ./build/osx-x64/MacUtilGUI
+
+      - name: Smoke osx-x64
+        run: |
+          set -euo pipefail
+          chmod +x ./build/osx-x64/MacUtilGUI
+          ./build/osx-x64/MacUtilGUI > /tmp/macutil-smoke.log 2>&1 &
+          pid=$!
+          sleep 8
+          if ! kill -0 "$pid" 2>/dev/null; then
+            echo "smoke failed: osx-x64 process died before 8s" >&2
+            cat /tmp/macutil-smoke.log >&2 || true
+            exit 1
+          fi
+          kill "$pid" 2>/dev/null || true
+          wait "$pid" 2>/dev/null || true
+          echo "smoke ok: osx-x64 pid $pid stayed up 8s"
+
+      - name: Package Intel app
+        run: |
+          set -euo pipefail
+          bundle="./dist/MacUtil-Intel.app"
+          mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Resources"
+          rsync -a ./build/osx-x64/ "$bundle/Contents/MacOS/"
+          chmod +x "$bundle/Contents/MacOS/MacUtilGUI"
+          cp MacUtilGUI/Info.plist "$bundle/Contents/Info.plist"
+          cp MacUtilGUI/MacUtilGUI.icns "$bundle/Contents/Resources/"
+          ditto -c -k --keepParent "$bundle" ./dist/MacUtil-macos-x64.zip
+
+      - name: Upload osx-x64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx-x64
+          path: ./build/osx-x64/MacUtilGUI
+          if-no-files-found: error
+
+      - name: Upload Intel app
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacUtil-macos-x64
+          path: ./dist/MacUtil-macos-x64.zip
+          if-no-files-found: error
+
+  macos-14:
+    name: macos-14
+    runs-on: macos-14
+    timeout-minutes: 30
+    needs: macos-13
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Cache .NET packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Check version lock
+        run: bash scripts/check-version.sh
+
+      - name: Publish osx-arm64
+        run: |
+          set -euo pipefail
+          dotnet publish MacUtilGUI/MacUtilGUI.fsproj \
+            --configuration Release \
+            --runtime osx-arm64 \
+            --self-contained true \
+            --output ./build/osx-arm64 \
+            /p:PublishSingleFile=true \
+            /p:IncludeNativeLibrariesForSelfExtract=true
+          file ./build/osx-arm64/MacUtilGUI
+          lipo -info ./build/osx-arm64/MacUtilGUI
+
+      - name: Download osx-x64 binary
+        uses: actions/download-artifact@v4
+        with:
+          name: osx-x64
+          path: ./build/osx-x64
+
+      - name: Smoke osx-arm64
+        run: |
+          set -euo pipefail
+          chmod +x ./build/osx-arm64/MacUtilGUI
+          ./build/osx-arm64/MacUtilGUI > /tmp/macutil-smoke.log 2>&1 &
+          pid=$!
+          sleep 8
+          if ! kill -0 "$pid" 2>/dev/null; then
+            echo "smoke failed: osx-arm64 process died before 8s" >&2
+            cat /tmp/macutil-smoke.log >&2 || true
+            exit 1
+          fi
+          kill "$pid" 2>/dev/null || true
+          wait "$pid" 2>/dev/null || true
+          echo "smoke ok: osx-arm64 pid $pid stayed up 8s"
+
+      - name: Lipo universal app
+        run: |
+          set -euo pipefail
+          chmod +x ./build/osx-x64/MacUtilGUI ./build/osx-arm64/MacUtilGUI
+          bundle="./dist/MacUtil-Universal.app"
+          mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Resources"
+          rsync -a --exclude="MacUtilGUI" ./build/osx-arm64/ "$bundle/Contents/MacOS/"
+          lipo -create \
+            ./build/osx-x64/MacUtilGUI \
+            ./build/osx-arm64/MacUtilGUI \
+            -output "$bundle/Contents/MacOS/MacUtilGUI"
+          chmod +x "$bundle/Contents/MacOS/MacUtilGUI"
+          cp MacUtilGUI/Info.plist "$bundle/Contents/Info.plist"
+          cp MacUtilGUI/MacUtilGUI.icns "$bundle/Contents/Resources/"
+          file "$bundle/Contents/MacOS/MacUtilGUI"
+          lipo -info "$bundle/Contents/MacOS/MacUtilGUI"
+          lipo -info "$bundle/Contents/MacOS/MacUtilGUI" | grep x86_64
+          lipo -info "$bundle/Contents/MacOS/MacUtilGUI" | grep arm64
+          arm_bundle="./dist/MacUtil-AppleSilicon.app"
+          mkdir -p "$arm_bundle/Contents/MacOS" "$arm_bundle/Contents/Resources"
+          rsync -a ./build/osx-arm64/ "$arm_bundle/Contents/MacOS/"
+          chmod +x "$arm_bundle/Contents/MacOS/MacUtilGUI"
+          cp MacUtilGUI/Info.plist "$arm_bundle/Contents/Info.plist"
+          cp MacUtilGUI/MacUtilGUI.icns "$arm_bundle/Contents/Resources/"
+          ditto -c -k --keepParent "$bundle" ./dist/MacUtil-Universal.zip
+          ditto -c -k --keepParent "$arm_bundle" ./dist/MacUtil-macos-arm64.zip
+
+      - name: Upload Apple Silicon app
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacUtil-macos-arm64
+          path: ./dist/MacUtil-macos-arm64.zip
+          if-no-files-found: error
+
+      - name: Upload universal app
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacUtil-Universal
+          path: ./dist/MacUtil-Universal.zip
+          if-no-files-found: error
