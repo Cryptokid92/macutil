@@ -8,95 +8,41 @@ permissions:
   packages: write
 
 jobs:
-  macutil_build:
-    runs-on: ubuntu-latest
+  macos-app:
+    uses: ./.github/workflows/macos-app.yml
 
+  publish:
+    needs: macos-app
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Read version
+        id: version
+        run: |
+          set -euo pipefail
+          bash scripts/check-version.sh
+          version=$(sed -n 's/.*<CFBundleVersion>\([^<]*\)<\/CFBundleVersion>.*/\1/p' MacUtilGUI/MacUtilGUI.fsproj | head -n 1)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: '9.0.x'
+          path: ./artifacts
+          pattern: MacUtil-*
+          merge-multiple: true
 
-      - name: Cache .NET packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: ${{ runner.os }}-nuget-
-
-      - name: Restore dependencies
-        run: dotnet restore MacUtilGUI/MacUtilGUI.fsproj
-
-      - name: Build and publish macOS x64
-        run: |
-          dotnet publish MacUtilGUI/MacUtilGUI.fsproj \
-            --configuration Release \
-            --runtime osx-x64 \
-            --self-contained true \
-            --output ./build/osx-x64 \
-            /p:PublishSingleFile=true \
-            /p:IncludeNativeLibrariesForSelfExtract=true
-
-      - name: Build and publish macOS ARM64
-        run: |
-          dotnet publish MacUtilGUI/MacUtilGUI.fsproj \
-            --configuration Release \
-            --runtime osx-arm64 \
-            --self-contained true \
-            --output ./build/osx-arm64 \
-            /p:PublishSingleFile=true \
-            /p:IncludeNativeLibrariesForSelfExtract=true
-
-      - name: Rename binaries
-        run: |
-          mv ./build/osx-x64/MacUtilGUI ./build/osx-x64/macutil-macos-x64
-          mv ./build/osx-arm64/MacUtilGUI ./build/osx-arm64/macutil-macos-arm64
-
-      - name: Extract Version
-        id: extract_version
-        run: |
-          # Fetch all tags
-          git fetch --tags
-          
-          # Get the latest tag, default to 0.0.0 if no tags exist
-          latest_tag=$(git tag --sort=-version:refname | head -n1)
-          if [ -z "$latest_tag" ]; then
-            latest_tag="0.0.0"
-          fi
-          
-          # Parse the latest tag (assuming format X.Y.Z)
-          IFS='.' read -ra VERSION_PARTS <<< "$latest_tag"
-          major=${VERSION_PARTS[0]:-0}
-          minor=${VERSION_PARTS[1]:-0}
-          patch=${VERSION_PARTS[2]:-0}
-          
-          # Increment minor version by 0.1 (increment minor, reset patch to 0)
-          new_minor=$((minor + 1))
-          version="${major}.${new_minor}.0"
-          
-          echo "Previous version: $latest_tag"
-          echo "New version: $version"
-          echo "version=$version" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Create and Upload Release
-        id: create_release
+      - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.version }}
-          name: Pre-Release ${{ env.version }}
-          body: |
-            ![GitHub Downloads (specific asset, specific tag)](https://img.shields.io/github/downloads/ChrisTitusTech/macutil/${{ env.version }}/macutil-macos-x64)
-            ![GitHub Downloads (specific asset, specific tag)](https://img.shields.io/github/downloads/ChrisTitusTech/macutil/${{ env.version }}/macutil-macos-arm64)
-
-          append_body: true
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Pre-Release ${{ steps.version.outputs.version }}
           generate_release_notes: true
+          fail_on_unmatched_files: true
           files: |
-            ./build/osx-x64/macutil-macos-x64
-            ./build/osx-arm64/macutil-macos-arm64
+            ./artifacts/MacUtil-Universal.zip
+            ./artifacts/MacUtil-macos-x64.zip
+            ./artifacts/MacUtil-macos-arm64.zip
           prerelease: true
         env:
-          version: ${{ env.version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
