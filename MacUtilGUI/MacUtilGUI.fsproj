@@ -10,7 +10,7 @@
     
     <!-- Self-contained single file configuration -->
     <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
+    <SelfContained>false</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -45,6 +45,7 @@
     <Compile Include="Services\DefaultsClient.fs" />
     <Compile Include="Services\ActionEngine.fs" />
     <Compile Include="Services\BrewClient.fs" />
+    <Compile Include="Services\PresetService.fs" />
     <Compile Include="ViewModels\ViewModelBase.fs" />
     <Compile Include="ViewModels\TweakRowViewModel.fs" />
     <Compile Include="ViewModels\AppRowViewModel.fs" />
