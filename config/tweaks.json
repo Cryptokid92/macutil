@@ -1,0 +1,19 @@
+{
+  "finder-show-extensions": {
+    "content": "Show all filename extensions",
+    "description": "Show file extensions in Finder windows and on the desktop.",
+    "category": "Finder",
+    "writes": [
+      {
+        "domain": "NSGlobalDomain",
+        "key": "AppleShowAllExtensions",
+        "type": "bool",
+        "apply": true,
+        "OriginalValue": false
+      }
+    ],
+    "appleDefault": false,
+    "reload": "Finder",
+    "risk": "Safe"
+  }
+}

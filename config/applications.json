@@ -1,0 +1,9 @@
+{
+  "visual-studio-code": {
+    "content": "Visual Studio Code",
+    "description": "Install Visual Studio Code with the Homebrew cask visual-studio-code.",
+    "category": "Developer Tools",
+    "cask": "visual-studio-code",
+    "link": "https://code.visualstudio.com/"
+  }
+}
