@@ -36,6 +36,7 @@ type MainWindowViewModel
     let cautionTweaks = ObservableCollection<TweakRowViewModel>()
     let allApps = ResizeArray<AppRowViewModel>()
     let apps = ObservableCollection<AppRowViewModel>()
+    let appGroups = ObservableCollection<AppGroupViewModel>()
     let appleUpdates = ObservableCollection<AppleUpdateRowViewModel>()
     let brewOutdated = ObservableCollection<BrewOutdatedRowViewModel>()
 
@@ -92,12 +93,30 @@ type MainWindowViewModel
 
             hit row.Content || hit row.Id || hit row.Category || hit row.Description
 
+    let appCategoryRank category =
+        match category with
+        | "Communication Apps" -> 0
+        | "Developer Tools" -> 1
+        | "Web Browsers" -> 2
+        | "Terminal" -> 3
+        | "Shell" -> 4
+        | "Utilities" -> 5
+        | _ -> 6
+
     let applyFilter () =
         apps.Clear()
+        appGroups.Clear()
 
-        for row in allApps do
-            if matches row searchText then
-                apps.Add(row)
+        let visible =
+            allApps |> Seq.filter (fun row -> matches row searchText) |> Seq.toList
+
+        for row in visible do
+            apps.Add(row)
+
+        visible
+        |> List.groupBy (fun row -> row.Category)
+        |> List.sortBy (fun (category, _) -> appCategoryRank category, category)
+        |> List.iter (fun (category, rows) -> appGroups.Add(AppGroupViewModel(category, rows)))
 
     let installSelected () =
         let selected = selectedAppRows ()
@@ -213,16 +232,6 @@ type MainWindowViewModel
         | "Privacy" -> 4
         | _ -> 5
 
-    let appCategoryRank category =
-        match category with
-        | "Communication Apps" -> 0
-        | "Developer Tools" -> 1
-        | "Web Browsers" -> 2
-        | "Terminal" -> 3
-        | "Shell" -> 4
-        | "Utilities" -> 5
-        | _ -> 6
-
     do
         catalog.Tweaks
         |> Map.toSeq
@@ -269,6 +278,8 @@ type MainWindowViewModel
     member _.CautionTweaks = cautionTweaks
 
     member _.Apps = apps
+
+    member _.AppGroups = appGroups
 
     member _.AllApps = allApps :> seq<AppRowViewModel>
 

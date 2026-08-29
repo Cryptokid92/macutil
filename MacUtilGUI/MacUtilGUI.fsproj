@@ -51,6 +51,7 @@
     <Compile Include="ViewModels\ViewModelBase.fs" />
     <Compile Include="ViewModels\TweakRowViewModel.fs" />
     <Compile Include="ViewModels\AppRowViewModel.fs" />
+    <Compile Include="ViewModels\AppGroupViewModel.fs" />
     <Compile Include="ViewModels\UpdateRowViewModel.fs" />
     <Compile Include="ViewModels\MainWindowViewModel.fs" />
     <Compile Include="Views\MainWindow.axaml.fs" />

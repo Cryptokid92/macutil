@@ -59,8 +59,51 @@ module InstallTabTests =
 
         vm.SearchText <- "brave"
         Assert.Equal(1, vm.Apps.Count)
-        Assert.Equal("brave-browser", Seq.exactlyOne vm.Apps |> fun row -> row.Id)
+        Assert.Equal("brave-browser", Seq.exactlyOne vm.Apps |> (fun row -> row.Id))
         Assert.Equal(26, Seq.length vm.AllApps)
 
         vm.SearchText <- ""
         Assert.Equal(26, vm.Apps.Count)
+
+    [<Fact>]
+    let InstallGroupsByCategory () =
+        let brew = BrewClientTests.FakeBrew([], [])
+        let vm = makeVm brew
+
+        let names = vm.AppGroups |> Seq.map (fun group -> group.Name) |> Seq.toList
+
+        Assert.Equal<string list>(
+            [ "Communication Apps"
+              "Developer Tools"
+              "Web Browsers"
+              "Terminal"
+              "Shell"
+              "Utilities" ],
+            names
+        )
+
+        Assert.Equal(26, vm.AppGroups |> Seq.sumBy (fun group -> group.Apps.Count))
+        Assert.Equal(26, vm.Apps.Count)
+
+        vm.SearchText <- "brave"
+        Assert.Equal(1, vm.AppGroups.Count)
+        let browsers = Seq.exactlyOne vm.AppGroups
+        Assert.Equal("Web Browsers", browsers.Name)
+        Assert.Equal("brave-browser", (Seq.exactlyOne browsers.Apps).Id)
+        Assert.Equal(1, vm.Apps.Count)
+
+        vm.SearchText <- "no-such-app"
+        Assert.Empty(vm.AppGroups)
+        Assert.Equal(0, vm.Apps.Count)
+
+        vm.SearchText <- ""
+        uncheckAll vm
+        let comm = vm.AppGroups |> Seq.find (fun group -> group.Name = "Communication Apps")
+
+        comm.AllSelected <- true
+        Assert.True(comm.Apps |> Seq.forall (fun row -> row.IsChecked))
+        Assert.True(comm.AllSelected)
+
+        comm.AllSelected <- false
+        Assert.True(comm.Apps |> Seq.forall (fun row -> not row.IsChecked))
+        Assert.False(comm.AllSelected)
