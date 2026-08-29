@@ -75,7 +75,8 @@ module TweakTabTests =
         let writesBefore = client.WriteCount
         vm.ApplySelected()
         Assert.Equal(writesBefore, client.WriteCount)
-        Assert.Equal("Nothing is selected.", vm.StatusText)
+        Assert.Equal("Nothing is selected.", vm.TweaksStatus)
+        Assert.Equal("", vm.InstallStatus)
         Assert.Empty(vm.SelectedIds)
 
         let pathBar = findRow vm.SafeTweaks "finder-path-bar"
@@ -164,7 +165,8 @@ module TweakTabTests =
         let writesBefore = client.WriteCount
         vm.ApplySelected()
         Assert.Equal(writesBefore, client.WriteCount)
-        Assert.Equal("Nothing is selected.", vm.StatusText)
+        Assert.Equal("Nothing is selected.", vm.TweaksStatus)
+        Assert.Equal("", vm.InstallStatus)
         Assert.Empty(vm.SelectedIds)
 
         let axaml =
@@ -179,3 +181,38 @@ module TweakTabTests =
         Assert.Contains("Maintenance", axaml)
         Assert.Contains("Updates", axaml)
         Assert.Contains("#1C1C1E", axaml)
+        Assert.Contains("{Binding TweaksStatus}", axaml)
+        Assert.Contains("{Binding InstallStatus}", axaml)
+        Assert.Contains("{Binding MaintenanceStatus}", axaml)
+        Assert.Contains("{Binding UpdatesStatus}", axaml)
+        Assert.DoesNotContain("{Binding StatusText}", axaml)
+
+        let appAxaml =
+            File.ReadAllText(Path.Combine(repoRoot (), "MacUtilGUI", "App.axaml"))
+
+        Assert.DoesNotContain("macos-terminal", appAxaml)
+        Assert.DoesNotContain("macos-left-panel", appAxaml)
+        Assert.DoesNotContain("macos-right-panel", appAxaml)
+
+    [<Fact>]
+    let PerTabStatusDoesNotLeak () =
+        let client = FakeDefaultsClient()
+        let vm = makeVm client
+        uncheckAll vm
+
+        let pathBar = findRow vm.SafeTweaks "finder-path-bar"
+        pathBar.IsChecked <- true
+        vm.ApplySelected()
+        Assert.Equal("Applied 1 tweak(s).", vm.TweaksStatus)
+        Assert.Equal("", vm.InstallStatus)
+        Assert.Equal("", vm.MaintenanceStatus)
+        Assert.Equal("", vm.UpdatesStatus)
+
+        for row in vm.AllApps do
+            row.IsChecked <- false
+
+        vm.InstallSelected()
+        Assert.Equal("Nothing is selected.", vm.InstallStatus)
+        Assert.Equal("Applied 1 tweak(s).", vm.TweaksStatus)
+        Assert.Equal("", vm.MaintenanceStatus)
+        Assert.Equal("", vm.UpdatesStatus)
