@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <Compile Include="ConfigSchemaTests.fs" />
-    <Compile Include="AppCatalogTests.fs" />
-    <Compile Include="BrewClientTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +25,11 @@
 
   <ItemGroup>
     <Content Include="..\config\*.json" CopyToOutputDirectory="PreserveNewest" Link="config\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="AppCatalogTests.fs" />
+    <Compile Include="BrewClientTests.fs" />
   </ItemGroup>
 
 </Project>
