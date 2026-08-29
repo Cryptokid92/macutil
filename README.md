@@ -1,7 +1,56 @@
 # MacUtil
 
-This is Cryptokid92's continuation of ChrisTitusTech/macutil under MIT.
+Cryptokid92's continuation of [ChrisTitusTech/macutil](https://github.com/ChrisTitusTech/macutil) under MIT. CTT marked the original HOLD in March 2026. This fork keeps SIP on and builds toward Winutil-shaped detect, apply, and undo.
 
-Clone the repository. Then run `dotnet run --project MacUtilGUI/MacUtilGUI.fsproj`.
+The contract is [SPEC.md](SPEC.md). Non-goals include SIP disable, Apple system app deletion, `/var/log` wipes, and MicroWin-style ISO work.
 
-The contract is SPEC.md. Non-Goals include SIP disable, Apple system app deletion, /var/log wipes, and MicroWin-style ISO work.
+## Run it
+
+You need .NET 9.
+
+```bash
+git clone https://github.com/Cryptokid92/macutil.git
+cd macutil
+dotnet run --project MacUtilGUI/MacUtilGUI.fsproj
+```
+
+The window is opaque `#1C1C1E`. The menu bar says MacUtil. The list you see is still the old script runner. The JSON catalog and the detect, apply, undo engine are in the tree. The Tweaks tab that binds checkboxes to live defaults is not on `main` yet.
+
+## What changed from the CTT tree
+
+- Fork contract in `SPEC.md`. SIP stays on. User-domain `defaults` never run as root.
+- Window chrome. `MainWindow.axaml` dropped AcrylicBlur. `App.axaml` sets `Name="MacUtil"`.
+- Action registry in JSON. `config/tweaks.json` and `config/applications.json` load through `ConfigLoader`. A tweak without `OriginalValue` fails load.
+- Engine. `ActionEngine.detect`, `apply`, and `undo` talk to `/usr/bin/defaults` as the current user. No sudo. No osascript. A missing key is `appleDefault`, not off. A second apply writes nothing when the live value already matches. Undo deletes the key when `OriginalValue` equals `appleDefault`.
+- 34 first-wave tweaks. Finder, Dock, keyboard, screenshots, and privacy-adjacent user defaults. Four of them are Caution. The rest are Safe.
+- 26 Homebrew apps, including Alacritty, Fastfetch, Kitty, and ZSH, which the old TOML hid because they had no entries. Android Debloater is not in the catalog.
+- `BrewClient` lists and installs casks and formulas. Already installed is success.
+- Leftover `scripts/system-setup` files no longer prefix `$ESCALATION_TOOL` on `defaults write`. `system-cleanup.sh` no longer deletes `/var/log`.
+
+Counts at this commit, regenerate with:
+
+```bash
+python3 -c 'import json; print(len(json.load(open("config/tweaks.json"))), len(json.load(open("config/applications.json"))))'
+```
+
+## What you cannot click yet
+
+The GUI still calls `ScriptService.runScript`. Presets, checkbox detect, JSON Homebrew install, and a CLI are next. Until those land, the catalogs and engine are for tests and for the tabs that follow.
+
+## What is coming
+
+In flight on this fork:
+
+- Tweaks tab. Checkboxes from `config/tweaks.json`. Apply and Undo call `ActionEngine`. Caution rows stay out of Standard.
+- Universal CI. `osx-x64` on macos-13 and `osx-arm64` on macos-14, one version string.
+
+Queued after those:
+
+- Install tab from `config/applications.json`. Delete `ScriptService.fs` once callers move.
+- CLI. `macutil detect`, `apply`, and `undo`.
+- Maintenance tab for user-level cleanup. Still no `/var/log`.
+- Updates tab. Lists `softwareupdate --list` and `brew outdated`. Does not run `softwareupdate --install`.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Upstream credit remains Chris Titus Tech. Cryptokid92 holds the 2026 continuation line.
