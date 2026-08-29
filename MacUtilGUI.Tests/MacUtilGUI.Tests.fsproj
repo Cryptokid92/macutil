@@ -13,6 +13,7 @@
     <Compile Include="AppCatalogTests.fs" />
     <Compile Include="BrewClientTests.fs" />
     <Compile Include="FirstWaveTweaksTests.fs" />
+    <Compile Include="TweakTabTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

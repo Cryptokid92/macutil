@@ -1,9 +1,27 @@
 namespace MacUtilGUI.Services
 
+open System.Diagnostics
 open MacUtilGUI.Models
 
 type IProcessKiller =
     abstract KillProcess: name: string -> unit
+
+type UnixProcessKiller() =
+    interface IProcessKiller with
+        member _.KillProcess(name) =
+            try
+                use proc = new Process()
+                proc.StartInfo.FileName <- "/usr/bin/killall"
+                proc.StartInfo.UseShellExecute <- false
+                proc.StartInfo.RedirectStandardOutput <- true
+                proc.StartInfo.RedirectStandardError <- true
+                proc.StartInfo.CreateNoWindow <- true
+                proc.StartInfo.ArgumentList.Add name
+
+                if proc.Start() then
+                    proc.WaitForExit()
+            with _ ->
+                ()
 
 module ActionEngine =
 

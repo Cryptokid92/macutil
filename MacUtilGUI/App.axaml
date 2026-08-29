@@ -130,5 +130,43 @@
         <Style Selector="Button.macos-list-item:pointerover">
             <Setter Property="Background" Value="#a788882e"/>
         </Style>
+
+        <Style Selector="TabControl.macos-tabs">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <Style Selector="TabItem">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,8"/>
+        </Style>
+
+        <Style Selector="CheckBox.macos-tweak">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style Selector="TextBlock.macos-caution">
+            <Setter Property="Foreground" Value="#FF9F0A"/>
+            <Setter Property="FontFamily" Value="SF Pro Display,SF Pro Text,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style Selector="Button.macos-quiet">
+            <Setter Property="FontFamily" Value="SF Pro Display,SF Pro Text,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#3A3A3C"/>
+        </Style>
+
+        <Style Selector="Button.macos-quiet:pointerover">
+            <Setter Property="Background" Value="#48484A"/>
+        </Style>
     </Application.Styles>
 </Application>
