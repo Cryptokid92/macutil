@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Compile Include="ConfigSchemaTests.fs" />
+    <Compile Include="AppCatalogTests.fs" />
+    <Compile Include="BrewClientTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
