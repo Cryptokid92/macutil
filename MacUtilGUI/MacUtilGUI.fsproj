@@ -44,6 +44,8 @@
     <Compile Include="Models\Pref.fs" />
     <Compile Include="Models\Action.fs" />
     <Compile Include="Services\ConfigLoader.fs" />
+    <Compile Include="Services\DefaultsClient.fs" />
+    <Compile Include="Services\ActionEngine.fs" />
     <Compile Include="Services\ScriptService.fs" />
     <Compile Include="ViewModels\ViewModelBase.fs" />
     <Compile Include="ViewModels\MainWindowViewModel.fs" />

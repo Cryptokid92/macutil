@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Compile Include="ConfigSchemaTests.fs" />
+    <Compile Include="FakeDefaultsClient.fs" />
+    <Compile Include="ActionEngineTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
