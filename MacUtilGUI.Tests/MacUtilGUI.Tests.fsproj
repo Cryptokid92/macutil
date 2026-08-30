@@ -19,6 +19,7 @@
     <Compile Include="TweakTabTests.fs" />
     <Compile Include="InstallTabTests.fs" />
     <Compile Include="PresetTests.fs" />
+    <Compile Include="PackagingTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
