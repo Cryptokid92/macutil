@@ -14,18 +14,17 @@ You need .NET 9.
 git clone https://github.com/Cryptokid92/macutil.git
 cd macutil
 dotnet run --project MacUtilGUI/MacUtilGUI.fsproj
-dotnet run --project MacUtilCLI -- detect
 ```
 
-The window is opaque `#1C1C1E`. The menu bar says MacUtil.
+The window is opaque `#1C1C1E`. The menu bar says MacUtil. Tabs are Tweaks, Install, Maintenance, and Updates. Each tab has its own status line. Tweaks copy does not leak onto Install.
 
-**Tweaks.** 34 user defaults as checkboxes. Detect reads live `defaults`. Apply and Undo write the selected ids only. Empty selection writes nothing and the status line says `Nothing is selected.` Caution rows sit in their own group, not mixed into Safe. Standard and Minimal select Safe Finder and Dock ids. Import and Export use a JSON array of ids.
+**Tweaks.** 34 user defaults. Finder, Dock, Keyboard, Screenshots, and Privacy sit in expanders. Caution is a separate band, not mixed into Safe. Detect reads live `defaults`. Apply and Undo write selected ids only. Empty selection writes nothing and says `Nothing is selected.` Standard and Minimal select Safe Finder and Dock ids. Import and Export use a JSON array of ids. Export writes that array with `Utf8JsonWriter`, so a trimmed app can still save a preset.
 
-**Install.** 26 Homebrew apps from `config/applications.json`. Detect is `brew list`, not a name match in `/Applications`. Search filters the list. Empty Install writes nothing. No sudo.
+**Install.** 26 Homebrew apps from `config/applications.json`, grouped by category: Communication Apps, Developer Tools, Web Browsers, Terminal, Shell, Utilities. Detect is `brew list`, not a name match in `/Applications`. Search filters rows, then drops empty groups. Header checkboxes select a whole group. Install, Uninstall, and Refresh sit in the footer. Empty Install or Uninstall writes nothing. Missing uninstall is success. No sudo. Never deletes Apple system apps.
 
 **Maintenance.** `brew update`, `brew cleanup`, and the user Homebrew cache from `brew --cache`. The engine refuses a path under `/var`. `brew cleanup` twice is success. Emptying Trash is not a default Safe action. No sudo.
 
-**Updates.** Lists `softwareupdate --list` and `brew outdated`. A macOS Tahoe row is labeled Major and stays unchecked. Copy command and the help line point at System Settings for major OS upgrades. Update Homebrew is opt-in on selected outdated packages. The program never runs Apple's install flag.
+**Updates.** Lists `softwareupdate --list` and `brew outdated`. A macOS Tahoe row is labeled Major, stays unchecked, and cannot be checked. Copy command and the help line point at System Settings for major OS upgrades. Update Homebrew is opt-in on selected outdated packages. The program never runs Apple's install flag.
 
 CLI commands share `ActionEngine`. No sudo.
 
@@ -46,18 +45,18 @@ dotnet test MacUtilGUI.Tests --configuration Release
 - Fork contract in `SPEC.md`. SIP stays on. User-domain `defaults` never run as root.
 - Action registry in JSON. `config/tweaks.json` and `config/applications.json` load through `ConfigLoader`. A tweak without `OriginalValue` fails load.
 - Engine. `ActionEngine.detect`, `apply`, and `undo` talk to `/usr/bin/defaults` as the current user. No sudo. No osascript. A missing key is Apple default, not off. A second apply writes nothing when the live value already matches. Undo deletes the key when `OriginalValue` equals `appleDefault`. After a successful Finder or Dock write the engine runs `/usr/bin/killall` as you, not as root.
-- 34 first-wave tweaks. Finder, Dock, keyboard, screenshots, and a few privacy keys in the user domain. Four are Caution. The rest are Safe.
+- 34 first-wave tweaks. Ten Finder, seven Dock, nine Keyboard, three Screenshots, five Privacy. Four are Caution. The rest are Safe.
 - 26 Homebrew apps, including Alacritty, Fastfetch, Kitty, and ZSH, which the old TOML hid because they had no entries. Android Debloater is not in the catalog.
-- `BrewClient` lists and installs casks and formulas. Already installed is success.
-- Tweaks tab. Checkboxes bind to detect. Apply and Undo pass selected ids only.
-- Install tab. Checkboxes bind to brew. Search filters. No sudo brew.
+- `BrewClient` lists, installs, and uninstalls casks and formulas. Already installed is success. Missing uninstall is success.
+- Tweaks tab. Checkboxes bind to detect. Groups use `Tweak.Category` inside Safe and Caution. Apply and Undo pass selected ids only.
+- Install tab. Groups use `AppEntry.Category`. Search filters. Install, Uninstall, Refresh. No sudo brew.
 - Presets. `config/preset.json` names Standard (Safe Finder and Dock ids) and Minimal (a smaller Safe subset). Caution ids stay out. Import of an unknown id fails and writes nothing.
-- Maintenance tab. `brew-update`, `brew-cleanup`, and `user-cache-brew`. `MaintenanceEngine` refuses a path under `/var`. `brew cleanup` twice still calls brew and returns ok. Emptying Trash is not a default Safe action.
-- Updates tab. Parses `softwareupdate --list`. Labels macOS Tahoe as Major and leaves it unchecked. `brew outdated` is a separate opt-in list. Help text points at System Settings for major OS upgrades. No Apple install action.
+- Maintenance tab. `brew-update`, `brew-cleanup`, and `user-cache-brew`. `MaintenanceEngine` refuses a path under `/var`.
+- Updates tab. Parses `softwareupdate --list`. Labels macOS Tahoe as Major and leaves it unchecked. `brew outdated` is a separate opt-in list. No Apple install action.
 - CLI. `dotnet run --project MacUtilCLI`. `detect` prints JSON of id to applied bool. `apply` and `undo` take `--preset`. `export` writes applied ids. `import` applies a JSON array of ids.
 - Opaque window. AcrylicBlur hid the window on Sequoia, so it is gone.
-- Universal CI. macos-13 publishes `osx-x64`. macos-14 publishes `osx-arm64` and lipos a universal zip. Release no longer tries to emit Mach-O from Ubuntu.
-- Tests. Schema, engine, Tweaks tab, Install tab, presets, Maintenance, Updates, and CLI. Fake `defaults` and fake brew so CI does not write the runner's prefs.
+- Universal CI. macos-13 is set to publish `osx-x64`. macos-14 publishes `osx-arm64` and lipos a universal zip. Release no longer tries to emit Mach-O from Ubuntu.
+- Tests. Schema, engine, tabs, presets, Maintenance, Updates, CLI, grouping, uninstall, and trim-safe export. Fake `defaults` and fake brew so CI does not write the runner's prefs.
 
 Counts at this commit, regenerate with:
 
@@ -69,8 +68,19 @@ python3 -c 'import json; print(len(json.load(open("config/tweaks.json"))), len(j
 
 - The GUI is no longer a TOML script launcher. `ScriptService.fs`, `ScriptInfo`, `ScriptCategory`, and `tab_data.toml` are gone.
 - The leftover linutil workflow `bashisms.yml` is gone.
-- `system-cleanup.sh` no longer deletes `/var/log`. `fix-finder.sh` no longer wipes home `.DS_Store`.
+- `system-cleanup.sh` is gone. It used to delete `/var/log`. Maintenance now runs brew only.
+- `fix-finder.sh` no longer wipes home `.DS_Store`.
 - Version lock is 0.2.1 across the fsproj, Info.plist, and local build scripts.
+
+## What is coming
+
+Not on `main` yet, and not promised as a date:
+
+- More Homebrew apps in `config/applications.json`.
+- CLI `install` and `uninstall` of catalog ids.
+- Header checkboxes that follow later child clicks. Today a mixed group stays unchecked on the header until you use the header again.
+
+Still out. Winutil Config, MicroWin, SIP off, Apple system app deletion, `/var/log` wipes, a plugin store, a second package manager.
 
 ## License
 
