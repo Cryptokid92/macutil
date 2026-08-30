@@ -43,6 +43,7 @@ jobs:
             ./artifacts/MacUtil-Universal.zip
             ./artifacts/MacUtil-macos-x64.zip
             ./artifacts/MacUtil-macos-arm64.zip
+            ./artifacts/MacUtil-${{ steps.version.outputs.version }}.dmg
           prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

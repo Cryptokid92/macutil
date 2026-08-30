@@ -8,7 +8,22 @@ Version is 0.2.1. Intel and Apple Silicon both build.
 
 ## Run it
 
-You need .NET 9. Install, Maintenance, and Updates talk to Homebrew.
+Download `MacUtil-<version>.dmg` (currently `MacUtil-0.2.1.dmg`) from [GitHub Releases](https://github.com/Cryptokid92/macutil/releases). Open the disk image and drag `MacUtil.app` to Applications.
+
+The app is unsigned. First launch: right-click `MacUtil.app` and choose Open, or:
+
+```bash
+xattr -cr /Applications/MacUtil.app
+```
+
+Local image (needs .NET 9):
+
+```bash
+./scripts/make-dmg.sh
+open dist/MacUtil-0.2.1.dmg
+```
+
+You can also run from source. Install, Maintenance, and Updates talk to Homebrew.
 
 ```bash
 git clone https://github.com/Cryptokid92/macutil.git
@@ -56,8 +71,8 @@ dotnet test MacUtilGUI.Tests --configuration Release
 - Per-tab status. Export of ids uses `Utf8JsonWriter` so a trimmed GUI can still save a preset.
 - CLI. `dotnet run --project MacUtilCLI`. `detect` prints JSON of id to applied bool. `apply` and `undo` take `--preset`. `export` writes applied ids. `import` applies a JSON array of ids.
 - Opaque window. AcrylicBlur hid the window on Sequoia, so it is gone.
-- Universal CI. macos-13 is set to publish `osx-x64`. macos-14 publishes `osx-arm64` and lipos a universal zip. Release no longer tries to emit Mach-O from Ubuntu.
-- Tests. Schema, engine, tabs, presets, Maintenance, Updates, CLI, grouping, uninstall, and trim-safe export. Fake `defaults` and fake brew so CI does not write the runner's prefs.
+- Universal CI. macos-14 publishes `osx-x64` and `osx-arm64`, lipos `MacUtil.app`, and wraps it in a drag-to-Applications DMG. `PublishTrimmed=false` on that publish so GUI Export keeps working. Release ships the DMG plus the three zip names.
+- Tests. Schema, engine, tabs, presets, Maintenance, Updates, CLI, grouping, uninstall, trim-safe export, and packaging source checks. Fake `defaults` and fake brew so CI does not write the runner's prefs.
 
 Counts at this commit, regenerate with:
 

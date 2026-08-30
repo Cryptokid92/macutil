@@ -322,6 +322,9 @@ MacUtilGUI/obj/
 MacUtilGUI/dist/
 MacUtilGUI/publish/
 
+# Repo-root DMG and publish output
+/dist/
+
 # macOS specific files
 .DS_Store
 .DS_Store?
