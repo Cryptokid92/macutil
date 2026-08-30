@@ -79,7 +79,7 @@ module PresetTests =
         let pathBar = findRow vm.SafeTweaks "finder-path-bar"
         pathBar.IsChecked <- true
         let writesBefore = client.WriteCount
-        let json = """[\"not-a-real-tweak\"]"""
+        let json = """["not-a-real-tweak"]"""
 
         match PresetService.parseImport loaded json with
         | Error msg -> Assert.Contains("Unknown tweak id", msg)
@@ -98,7 +98,7 @@ module PresetTests =
         Assert.Equal(writesBefore, client.WriteCount)
         Assert.Contains("Unknown tweak id", err)
 
-        match PresetService.parseImport loaded """[\"finder-path-bar\", \"not-a-real-tweak\"]""" with
+        match PresetService.parseImport loaded """["finder-path-bar", "not-a-real-tweak"]""" with
         | Error msg -> Assert.Contains("Unknown tweak id", msg)
         | Ok _ -> Assert.Fail("mixed unknown id must fail without a partial list")
 
@@ -189,7 +189,7 @@ module PresetTests =
         let loaded = catalog ()
         let ids = [ "finder-path-bar"; "finder-show-extensions" ]
         let json = PresetService.exportIds ids
-        Assert.Equal("""[\"finder-path-bar\",\"finder-show-extensions\"]""", json)
+        Assert.Equal("""["finder-path-bar","finder-show-extensions"]""", json)
 
         match PresetService.parseImport loaded json with
         | Ok parsed -> Assert.Equal<string list>(ids, parsed)
