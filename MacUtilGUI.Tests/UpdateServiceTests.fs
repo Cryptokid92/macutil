@@ -171,13 +171,15 @@ module UpdateServiceTests =
 
         vm.UpdateHomebrew()
         Assert.Empty(brew.UpgradeCalls)
-        Assert.Equal("Nothing is selected.", vm.StatusText)
+        Assert.Equal("Nothing is selected.", vm.UpdatesStatus)
+        Assert.Equal("", vm.TweaksStatus)
 
         let wget = Seq.exactlyOne vm.BrewOutdated
         wget.IsChecked <- true
         vm.UpdateHomebrew()
         Assert.Equal<string list>([ [ "upgrade"; "wget" ] ], brew.UpgradeCalls)
-        Assert.Equal("Updated 1 Homebrew package(s).", vm.StatusText)
+        Assert.Equal("Updated 1 Homebrew package(s).", vm.UpdatesStatus)
+        Assert.Equal("", vm.InstallStatus)
 
         let axaml =
             File.ReadAllText(Path.Combine(root, "MacUtilGUI", "Views", "MainWindow.axaml"))

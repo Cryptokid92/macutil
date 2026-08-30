@@ -19,6 +19,12 @@ type RelayCommand(canExecute: obj -> bool, execute: obj -> unit) =
 
     new(execute: obj -> unit) = RelayCommand((fun _ -> true), execute)
 
+type AppTab =
+    | Tweaks
+    | Install
+    | Maintenance
+    | Updates
+
 type MainWindowViewModel
     (
         catalog: Catalog,
@@ -30,7 +36,10 @@ type MainWindowViewModel
     ) as this =
     inherit ViewModelBase()
 
-    let mutable statusText: string = ""
+    let mutable tweaksStatus = ""
+    let mutable installStatus = ""
+    let mutable maintenanceStatus = ""
+    let mutable updatesStatus = ""
     let mutable searchText: string = ""
     let safeTweaks = ObservableCollection<TweakRowViewModel>()
     let cautionTweaks = ObservableCollection<TweakRowViewModel>()
@@ -54,33 +63,45 @@ type MainWindowViewModel
     let selectedAppRows () =
         allApps |> Seq.filter (fun row -> row.IsChecked) |> Seq.toList
 
-    let setStatus text =
-        statusText <- text
-        this.OnPropertyChanged("StatusText")
+    let statusProperty tab =
+        match tab with
+        | Tweaks -> "TweaksStatus"
+        | Install -> "InstallStatus"
+        | Maintenance -> "MaintenanceStatus"
+        | Updates -> "UpdatesStatus"
+
+    let setStatus tab text =
+        match tab with
+        | Tweaks -> tweaksStatus <- text
+        | Install -> installStatus <- text
+        | Maintenance -> maintenanceStatus <- text
+        | Updates -> updatesStatus <- text
+
+        this.OnPropertyChanged(statusProperty tab)
 
     let applySelected () =
         let selected = selectedRows ()
 
         if selected.IsEmpty then
-            setStatus "Nothing is selected."
+            setStatus Tweaks "Nothing is selected."
         else
             for row in selected do
                 ActionEngine.apply client killer row.Tweak
 
             refreshDetect ()
-            setStatus (sprintf "Applied %d tweak(s)." selected.Length)
+            setStatus Tweaks (sprintf "Applied %d tweak(s)." selected.Length)
 
     let undoSelected () =
         let selected = selectedRows ()
 
         if selected.IsEmpty then
-            setStatus "Nothing is selected."
+            setStatus Tweaks "Nothing is selected."
         else
             for row in selected do
                 ActionEngine.undo client killer row.Tweak
 
             refreshDetect ()
-            setStatus (sprintf "Undid %d tweak(s)." selected.Length)
+            setStatus Tweaks (sprintf "Undid %d tweak(s)." selected.Length)
 
     let refreshAppDetect () =
         for row in allApps do
@@ -124,7 +145,7 @@ type MainWindowViewModel
         let selected = selectedAppRows ()
 
         if selected.IsEmpty then
-            setStatus "Nothing is selected."
+            setStatus Install "Nothing is selected."
         else
             let mutable errors = []
 
@@ -136,15 +157,15 @@ type MainWindowViewModel
             refreshAppDetect ()
 
             if errors.IsEmpty then
-                setStatus (sprintf "Installed %d app(s)." selected.Length)
+                setStatus Install (sprintf "Installed %d app(s)." selected.Length)
             else
-                setStatus (String.concat "\n" (List.rev errors))
+                setStatus Install (String.concat "\n" (List.rev errors))
 
     let uninstallSelected () =
         let selected = selectedAppRows ()
 
         if selected.IsEmpty then
-            setStatus "Nothing is selected."
+            setStatus Install "Nothing is selected."
         else
             let mutable errors = []
 
@@ -156,13 +177,13 @@ type MainWindowViewModel
             refreshAppDetect ()
 
             if errors.IsEmpty then
-                setStatus (sprintf "Uninstalled %d app(s)." selected.Length)
+                setStatus Install (sprintf "Uninstalled %d app(s)." selected.Length)
             else
-                setStatus (String.concat "\n" (List.rev errors))
+                setStatus Install (String.concat "\n" (List.rev errors))
 
     let refreshInstalled () =
         refreshAppDetect ()
-        setStatus "Refreshed installed apps."
+        setStatus Install "Refreshed installed apps."
 
     let selectIds (ids: string list) =
         let wanted = Set.ofList ids
@@ -172,30 +193,30 @@ type MainWindowViewModel
 
     let selectPreset name =
         match PresetService.resolve catalog name with
-        | Error msg -> setStatus msg
+        | Error msg -> setStatus Tweaks msg
         | Ok ids ->
             selectIds ids
-            setStatus (sprintf "Selected %s." name)
+            setStatus Tweaks (sprintf "Selected %s." name)
 
     let exportSelected () =
         let ids = selectedRows () |> List.map (fun row -> row.Id)
-        setStatus (sprintf "Exported %d id(s)." ids.Length)
+        setStatus Tweaks (sprintf "Exported %d id(s)." ids.Length)
         PresetService.exportIds ids
 
     let importJson json =
         match PresetService.parseImport catalog json with
         | Error msg ->
-            setStatus msg
+            setStatus Tweaks msg
             false
         | Ok ids ->
             selectIds ids
-            setStatus (sprintf "Imported %d id(s)." ids.Length)
+            setStatus Tweaks (sprintf "Imported %d id(s)." ids.Length)
             true
 
     let runMaintenance id =
         match MaintenanceEngine.run brew cacheClear id with
-        | Ok msg -> setStatus msg
-        | Error msg -> setStatus msg
+        | Ok msg -> setStatus Maintenance msg
+        | Error msg -> setStatus Maintenance msg
 
     let combinedOutput stdout stderr = stdout + "\n" + stderr
 
@@ -214,12 +235,12 @@ type MainWindowViewModel
             brewOutdated.Add(BrewOutdatedRowViewModel(pkg))
 
         if report then
-            setStatus (
-                sprintf "Listed %d Apple update(s) and %d Homebrew package(s)." appleUpdates.Count brewOutdated.Count
-            )
+            setStatus
+                Updates
+                (sprintf "Listed %d Apple update(s) and %d Homebrew package(s)." appleUpdates.Count brewOutdated.Count)
 
     let copySystemSettings () =
-        setStatus UpdateService.systemSettingsHelp
+        setStatus Updates UpdateService.systemSettingsHelp
 
     let updateBrewSelected () =
         let selected =
@@ -229,13 +250,13 @@ type MainWindowViewModel
             |> Seq.toList
 
         if selected.IsEmpty then
-            setStatus "Nothing is selected."
+            setStatus Updates "Nothing is selected."
         else
             match UpdateService.upgradeBrew brew selected with
             | Ok msg ->
                 refreshUpdates false
-                setStatus msg
-            | Error msg -> setStatus msg
+                setStatus Updates msg
+            | Error msg -> setStatus Updates msg
 
     let applyCommand = RelayCommand(fun _ -> applySelected ())
     let undoCommand = RelayCommand(fun _ -> undoSelected ())
@@ -324,7 +345,13 @@ type MainWindowViewModel
 
     member _.AllApps = allApps :> seq<AppRowViewModel>
 
-    member _.StatusText = statusText
+    member _.TweaksStatus = tweaksStatus
+
+    member _.InstallStatus = installStatus
+
+    member _.MaintenanceStatus = maintenanceStatus
+
+    member _.UpdatesStatus = updatesStatus
 
     member this.SearchText
         with get () = searchText
@@ -364,7 +391,7 @@ type MainWindowViewModel
 
     member _.ImportJson(json: string) = importJson json
 
-    member _.SetStatus(text: string) = setStatus text
+    member _.SetStatus(tab: AppTab, text: string) = setStatus tab text
 
     member _.ApplyCommand = applyCommand
 

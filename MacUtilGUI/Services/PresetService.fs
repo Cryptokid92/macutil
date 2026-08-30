@@ -1,6 +1,8 @@
 namespace MacUtilGUI.Services
 
 open System
+open System.IO
+open System.Text
 open System.Text.Json
 open System.Text.Json.Nodes
 open MacUtilGUI.Models
@@ -13,7 +15,16 @@ module PresetService =
         | None -> Error $"Unknown preset '{name}'"
 
     let exportIds (ids: string list) =
-        JsonSerializer.Serialize(Array.ofList ids)
+        use stream = new MemoryStream()
+        use writer = new Utf8JsonWriter(stream)
+        writer.WriteStartArray()
+
+        for id in ids do
+            writer.WriteStringValue id
+
+        writer.WriteEndArray()
+        writer.Flush()
+        Encoding.UTF8.GetString(stream.ToArray())
 
     let parseImport (catalog: Catalog) (json: string) =
         try

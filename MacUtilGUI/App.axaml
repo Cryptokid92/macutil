@@ -52,18 +52,6 @@
             <Setter Property="FontWeight" Value="Medium"/>
         </Style>
         
-        <!-- Terminal styles (identical in both themes) -->
-        <Style Selector="ScrollViewer.macos-terminal">
-            <Setter Property="Background" Value="#000000"/>
-        </Style>
-        
-        <Style Selector="TextBlock.macos-terminal">
-            <Setter Property="Background" Value="#000000"/>
-            <Setter Property="Foreground" Value="#00FF00"/>
-            <Setter Property="FontFamily" Value="SF Mono,Monaco,Inconsolata,Consolas,monospace"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
-        
         <!-- macOS Window Controls -->
         <Style Selector="Button.macos-window-control">
             <Setter Property="BorderThickness" Value="0"/>
@@ -82,18 +70,6 @@
             <Setter Property="Background" Value="#E62C2C2E"/>
             <Setter Property="BorderBrush" Value="#B33A3A3C"/>
             <Setter Property="BoxShadow" Value="0 1 3 0 #00000075"/>
-        </Style>
-        
-        <Style Selector="Border.macos-left-panel">
-            <Setter Property="Background" Value="#772C2C2E"/>
-            <Setter Property="BorderBrush" Value="#CC3A3A3C"/>
-            <Setter Property="BoxShadow" Value="0 1 3 0 #00000000"/>
-        </Style>
-        
-        <Style Selector="Border.macos-right-panel">
-            <Setter Property="Background" Value="#992C2C2E"/>
-            <Setter Property="BorderBrush" Value="#CC3A3A3C"/>
-            <Setter Property="BoxShadow" Value="0 1 3 0 #00000000"/>
         </Style>
         
         <Style Selector="Border.macos-content">
